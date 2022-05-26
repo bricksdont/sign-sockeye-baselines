@@ -1,0 +1,12 @@
+.idea
+data
+models
+shared_models
+logs
+prepared
+tools
+translations
+venvs
+evaluations
+summaries
+deploy
