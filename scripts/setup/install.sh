@@ -1,6 +1,6 @@
 #! /bin/bash
 
-module load anaconda3 volta nvidia/cuda10.2-cudnn7.6.5
+module load volta anaconda3 nvidia/cuda10.2-cudnn7.6.5
 
 scripts=`dirname "$0"`
 base=$scripts/../..

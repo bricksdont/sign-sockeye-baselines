@@ -18,6 +18,6 @@ Try to create all files and run all scripts, but on CPU only and exit immediatel
 
 ## Run a bilingual baseline
 
-Train a baseline system for DGS -> DE:
+Train a baseline system for DSGS -> DE:
 
     ./scripts/running/run_baseline.sh
