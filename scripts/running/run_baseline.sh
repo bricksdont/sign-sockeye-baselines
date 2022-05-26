@@ -12,7 +12,7 @@ trg="de"
 
 model_name="baseline"
 
-training_corpora="uhh"
+training_corpora="focusnews"
 testing_corpora="test"
 
 . $scripts/running/run_generic.sh
