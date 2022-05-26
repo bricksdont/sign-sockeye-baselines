@@ -191,31 +191,51 @@ class ParallelWriter:
 
         self.size += 1
 
+    @property
+    def writable(self) -> bool:
+
+        if self.max_size is None:
+            return True
+
+        return self.max_size > self.size
+
 
 def decide_on_split(num_examples: int,
+                    train_size: int,
                     devtest_size: int,
                     writers: Dict[str, ParallelWriter]) -> Dict[int, ParallelWriter]:
     """
 
     :param num_examples:
+    :param train_size:
     :param devtest_size:
     :param writers:
     :return:
     """
 
+    train_indexes = np.arange(num_examples, dtype=np.int32)
+
+    # sub-sample if train_size has a limit
+
+    if train_size != -1:
+        train_indexes = np.random.choice(train_indexes, size=(train_size,), replace=False)
+
     # default: training writer
-    writers_by_id = {index: writers["train"] for index in range(num_examples)}
+
+    writers_by_id = {index: writers["train"] for index in train_indexes}
 
     # sample indexes for dev
 
-    dev_indexes = np.random.randint(low=0, high=num_examples, size=(devtest_size,))
+    dev_indexes = np.random.choice(train_indexes, size=(devtest_size,), replace=False)
 
     for dev_index in dev_indexes:
         writers_by_id[dev_index] = writers["dev"]
 
     # sample indexes for test
 
-    test_indexes = np.random.randint(low=0, high=num_examples, size=(devtest_size,))
+    remaining_train_indexes = np.asarray([i for i in train_indexes if i not in dev_indexes])
+
+    test_indexes = np.random.choice(remaining_train_indexes, size=(devtest_size,), replace=False)
 
     for test_index in test_indexes:
         writers_by_id[test_index] = writers["test"]
@@ -234,6 +254,8 @@ def parse_args():
 
     parser.add_argument("--seed", type=int,
                         help="Random seed for data splits.", required=True)
+    parser.add_argument("--train-size", type=int, default=None,
+                        help="Maximum number of examples in train set. Default: no limit.", required=False)
     parser.add_argument("--devtest-size", type=int,
                         help="Number of examples in dev and test set each.", required=True)
 
@@ -257,7 +279,8 @@ def main():
 
     writer_train = ParallelWriter(data_sub=args.data_sub,
                                   pose_type=args.pose_type,
-                                  prefix="train")
+                                  prefix="train",
+                                  max_size=args.train_size)
 
     writer_dev = ParallelWriter(data_sub=args.data_sub,
                                 pose_type=args.pose_type,
@@ -277,7 +300,10 @@ def main():
     subtitles_by_id = read_subtitles(subtitle_dir)
 
     num_examples = sum([len(subtitles) for subtitles in subtitles_by_id.values()])
-    writers_by_id = decide_on_split(num_examples=num_examples, devtest_size=args.devtest_size, writers=writers)
+    writers_by_id = decide_on_split(num_examples=num_examples,
+                                    train_size=args.train_size,
+                                    devtest_size=args.devtest_size,
+                                    writers=writers)
 
     # step through poses one by one
     pose_dir = os.path.join(args.download_sub, args.pose_type)

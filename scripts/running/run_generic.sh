@@ -11,6 +11,8 @@
 # $training_corpora
 # $testing_corpora
 # $seed
+# $fps
+# $pose_type
 
 module load volta nvidia/cuda10.2-cudnn7.6.5 anaconda3
 
@@ -39,6 +41,14 @@ fi
 
 if [ -z "$testing_corpora" ]; then
     testing_corpora="test"
+fi
+
+if [ -z "$fps" ]; then
+    fps="25"
+fi
+
+if [ -z "$pose_type" ]; then
+    pose_type="openpose"
 fi
 
 if [ -z "$seed" ]; then
