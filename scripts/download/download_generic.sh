@@ -52,4 +52,4 @@ done
 
 echo "Sizes of files:"
 
-wc -l $download/*/*
+wc -l $download/*/*/*
