@@ -12,7 +12,7 @@
 # $testing_corpora
 # $seed
 
-module load generic nvidia/cuda10.2-cudnn7.6.5 anaconda3
+module load volta nvidia/cuda10.2-cudnn7.6.5 anaconda3
 
 scripts=$base/scripts
 logs=$base/logs
