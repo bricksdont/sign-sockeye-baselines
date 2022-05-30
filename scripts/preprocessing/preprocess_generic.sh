@@ -87,9 +87,11 @@ mkdir -p $data_sub
 if [[ $dry_run == "true" ]]; then
     train_size_arg="--train-size $DRY_RUN_TRAIN_SIZE"
     devtest_size=$DRY_RUN_DEVTEST_SIZE
+    dry_run_arg="--dry-run"
 else
     train_size_arg=""
     devtest_size=$DEVTEST_SIZE
+    dry_run_arg=""
 fi
 
 for training_corpus in $training_corpora; do
@@ -107,7 +109,7 @@ for training_corpus in $training_corpora; do
         --seed $seed \
         --devtest-size $devtest_size \
         --fps $fps \
-        --pose-type $pose_type $train_size_arg
+        --pose-type $pose_type $train_size_arg $dry_run_arg
 
 done
 

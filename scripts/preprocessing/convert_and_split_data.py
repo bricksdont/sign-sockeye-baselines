@@ -249,13 +249,15 @@ class ParallelWriter:
 def decide_on_split(num_examples: int,
                     train_size: Optional[int],
                     devtest_size: int,
-                    writers: Dict[str, ParallelWriter]) -> Dict[int, ParallelWriter]:
+                    writers: Dict[str, ParallelWriter],
+                    dry_run: bool) -> Dict[int, ParallelWriter]:
     """
 
     :param num_examples:
     :param train_size:
     :param devtest_size:
     :param writers:
+    :param dry_run:
     :return:
     """
 
@@ -264,7 +266,13 @@ def decide_on_split(num_examples: int,
     # sub-sample if train_size has a limit
 
     if train_size is not None:
-        train_indexes = np.random.choice(train_indexes, size=(train_size,), replace=False)
+        total_size = train_size + (2 * devtest_size)
+
+        if dry_run:
+            # for a dry run select the first N examples (non-random)
+            train_indexes = np.arange(total_size)
+        else:
+            train_indexes = np.random.choice(train_indexes, size=(total_size,), replace=False)
 
     # default: training writer
 
@@ -307,6 +315,8 @@ def parse_args():
                         help="Maximum number of examples in train set. Default: no limit.", required=False)
     parser.add_argument("--devtest-size", type=int,
                         help="Number of examples in dev and test set each.", required=True)
+    parser.add_argument("--dry-run", action="store_true",
+                        help="Whether this is a dry run only.", required=False)
 
     parser.add_argument("--fps", type=int,
                         help="Framerate.", required=True)
@@ -363,7 +373,8 @@ def main():
     writers_by_id = decide_on_split(num_examples=num_examples,
                                     train_size=args.train_size,
                                     devtest_size=args.devtest_size,
-                                    writers=writers)
+                                    writers=writers,
+                                    dry_run=args.dry_run)
 
     # step through poses one by one
     pose_dir = os.path.join(args.download_sub, args.pose_type)
