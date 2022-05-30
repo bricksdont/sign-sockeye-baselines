@@ -198,7 +198,9 @@ done
 # sizes
 echo "Sizes of all files:"
 
-ls -l $data_sub/*
+ls -lh $data_sub/*.h5
+wc -l $data_sub/*.txt
+wc -l $data_sub/*.trg
 wc -l $shared_models_sub/*
 
 echo "time taken:"

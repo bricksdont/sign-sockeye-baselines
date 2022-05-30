@@ -116,8 +116,6 @@ id_preprocess=$(
 
 echo "  id_preprocess: $id_preprocess | $logs_sub_sub/slurm-$id_preprocess.out" | tee -a $logs_sub_sub/MAIN
 
-exit
-
 # Sockeye prepare (depends on preprocess)
 
 id_prepare=$(
@@ -126,10 +124,12 @@ id_prepare=$(
     --dependency=afterok:$id_preprocess \
     $SLURM_LOG_ARGS \
     $scripts/preprocessing/prepare_generic.sh \
-    $base $src $trg $model_name $seed $spm_strategy
+    $base $src $trg $model_name $seed
 )
 
 echo "  id_prepare: $id_prepare | $logs_sub_sub/slurm-$id_prepare.out"  | tee -a $logs_sub_sub/MAIN
+
+exit
 
 # Sockeye train (depends on prepare)
 
