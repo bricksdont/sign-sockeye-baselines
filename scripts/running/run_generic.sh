@@ -155,8 +155,6 @@ id_translate=$(
 
 echo "  id_translate: $id_translate | $logs_sub_sub/slurm-$id_translate.out"  | tee -a $logs_sub_sub/MAIN
 
-exit
-
 # evaluate BLEU and other metrics (depends on translate)
 
 id_evaluate=$(
@@ -165,7 +163,7 @@ id_evaluate=$(
     --dependency=afterok:$id_translate \
     $SLURM_LOG_ARGS \
     $scripts/evaluation/evaluate_generic.sh \
-    $base $src $trg $model_name "$testing_corpora" $logs_sub_sub/LANGPAIRS.sh $lowercase_glosses $generalize_dgs_glosses
+    $base $src $trg $model_name "$testing_corpora"
 )
 
 echo "  id_evaluate: $id_evaluate | $logs_sub_sub/slurm-$id_evaluate.out"  | tee -a $logs_sub_sub/MAIN
