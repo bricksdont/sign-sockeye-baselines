@@ -41,8 +41,10 @@ def read_openpose_surrey_format(filepath: str, fps: int) -> Pose:
         # extract tar.xz
         extract_tar_xz_file(filepath=filepath, target_dir=tmpdir_name)
 
+        openpose_dir = os.path.join(tmpdir_name, "openpose")
+
         # load directory
-        poses = load_openpose_directory(directory=tmpdir_name, fps=fps)
+        poses = load_openpose_directory(directory=openpose_dir, fps=fps)
 
     return poses
 
