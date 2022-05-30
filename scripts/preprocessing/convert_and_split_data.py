@@ -232,7 +232,7 @@ class ParallelWriter:
         if self.max_size is not None:
             assert self.size < self.max_size, "Reached maximum size of %d, refusing to add more examples." % self.max_size
 
-        self.text_writer.write(text)
+        self.text_writer.write(text + "\n")
         self.pose_writer.add(pose_slice)
 
         self.size += 1
