@@ -16,7 +16,10 @@ source activate $venvs/sockeye3
 
 # install Sockeye (install custom branch)
 
-pip install git+https://github.com/ZurichNLP/sockeye.git@continuous_outputs_3.1
+# TODO: this currently does not work until  https://github.com/sign-language-processing/datasets version 0.0.7
+# is pushed to PyPi
+
+pip --no-cache-dir install git+https://github.com/ZurichNLP/sockeye.git@continuous_outputs_3.1
 
 # install Moses scripts for preprocessing
 

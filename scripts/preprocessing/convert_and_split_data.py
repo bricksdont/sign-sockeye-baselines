@@ -181,7 +181,7 @@ class ParallelWriter:
 
         poses_output_name = ".".join([self.output_prefix, self.pose_type, self.subset, "h5"])
         self.poses_output_path = os.path.join(self.output_dir, poses_output_name)
-        self.pose_writer = sockeye.h5_io.H5Writer(filename=self.poses_output_path)
+        self.pose_writer = h5_io.H5Writer(filename=self.poses_output_path)
 
         self.size = 0
 

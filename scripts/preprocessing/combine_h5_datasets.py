@@ -27,9 +27,9 @@ def main():
     logging.basicConfig(level=logging.DEBUG)
     logging.debug(args)
 
-    readers = [sockeye.h5_io.H5Reader(filename=input_path) for input_path in args.inputs]
+    readers = [h5_io.H5Reader(filename=input_path) for input_path in args.inputs]
 
-    writer = sockeye.h5_io.H5Writer(filename=args.output)
+    writer = h5_io.H5Writer(filename=args.output)
 
     for reader in readers:
         for sample in reader.iterate():
