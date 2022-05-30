@@ -86,6 +86,8 @@ echo "MODEL NAME: $model_name" | tee -a $logs_sub_sub/MAIN
 echo "TRAINING CORPORA: $training_corpora" | tee -a $logs_sub_sub/MAIN
 echo "TESTING CORPORA: $testing_corpora" | tee -a $logs_sub_sub/MAIN
 echo "SEED: $seed" | tee -a $logs_sub_sub/MAIN
+echo "POSE_TYPE: $pose_type" | tee -a $logs_sub_sub/MAIN
+echo "SENTENCEPIECE_VOCAB_SIZE: $sentencepiece_vocab_size" | tee -a $logs_sub_sub/MAIN
 echo "DRY RUN: $dry_run" | tee -a $logs_sub_sub/MAIN
 
 # download corpora
