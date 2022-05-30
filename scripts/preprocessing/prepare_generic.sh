@@ -7,6 +7,7 @@
 # $trg
 # $model_name
 # $seed
+# $pose_type
 
 base=$1
 src=$2
@@ -43,7 +44,14 @@ fi
 
 mkdir -p $prepared_sub_sub
 
-cmd="python -m sockeye.prepare_data -s $data_sub_sub/train.h5 -t $data_sub_sub/train.pieces.trg -o $prepared_sub_sub --max-seq-len 500:250 --seed $seed"
+if [[ $pose_type == "openpose" ]]; then
+    num_features=274
+else
+    # mediapipe poses
+    num_features="TODO"
+fi
+
+cmd="python -m sockeye.prepare_data -s $data_sub_sub/train.h5 -t $data_sub_sub/train.pieces.trg -o $prepared_sub_sub --max-seq-len 500:250 --seed $seed --source-is-continuous --source-continuous-num-features $num_features"
 
 echo "Executing:"
 echo "$cmd"
@@ -54,7 +62,8 @@ python -m sockeye.prepare_data \
                         -o $prepared_sub_sub \
                         --max-seq-len 500:250 \
                         --seed $seed \
-                        --shared-vocab
+                        --source-is-continuous \
+                        --source-continuous-num-features $num_features
 
 echo "time taken:"
 echo "$SECONDS seconds"
