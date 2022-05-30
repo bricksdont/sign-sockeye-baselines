@@ -18,28 +18,28 @@ from pose_format import Pose
 from pose_format.utils.openpose import load_openpose_directory
 
 
-def extract_tar_xz_file(filename: str, target_dir: str):
+def extract_tar_xz_file(filepath: str, target_dir: str):
     """
 
-    :param filename:
+    :param filepath:
     :param target_dir:
     :return:
     """
-    with tarfile.open(filename) as tar_handle:
+    with tarfile.open(filepath) as tar_handle:
         tar_handle.extractall(path=target_dir)
 
 
-def read_openpose_surrey_format(filename: str, fps: int) -> Pose:
+def read_openpose_surrey_format(filepath: str, fps: int) -> Pose:
     """
     Read files of the form "focusnews.071.openpose.tar.xz"
 
-    :param filename:
+    :param filepath:
     :param fps:
     :return:
     """
     with tempfile.TemporaryDirectory(prefix="extract_pose_file") as tmpdir_name:
         # extract tar.xz
-        extract_tar_xz_file(filename=filename, target_dir=tmpdir_name)
+        extract_tar_xz_file(filepath=filepath, target_dir=tmpdir_name)
 
         # load directory
         poses = load_openpose_directory(directory=tmpdir_name, fps=fps)
@@ -329,8 +329,10 @@ def main():
     for filename in os.listdir(pose_dir):
         file_id = get_file_id(filename)
 
+        filepath = os.path.join(pose_dir, filename)
+
         if "openpose" in filename:
-            poses = read_openpose_surrey_format(filename=filename, fps=args.fps)
+            poses = read_openpose_surrey_format(filepath=filepath, fps=args.fps)
         elif "mediapipe" in filename:
             raise NotImplementedError
         else:
