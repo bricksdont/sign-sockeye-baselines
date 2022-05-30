@@ -111,8 +111,6 @@ done
 
 for subset in $ALL_SUBSETS; do
 
-    # all_corpora: train, dev, test
-
     touch $data_sub/$subset.txt
 
     # combine texts
@@ -187,7 +185,7 @@ python $scripts/preprocessing/train_sentencepiece.py \
 for subset in $ALL_SUBSETS; do
     cat $data_sub/$subset.normalized.trg | \
         python $scripts/preprocessing/apply_sentencepiece.py \
-            --model $shared_models_sub/$lang.sentencepiece.model \
+            --model $shared_models_sub/trg.sentencepiece.model \
                 > $data_sub/$subset.pieces.trg
 done
 

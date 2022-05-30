@@ -331,8 +331,10 @@ def main():
 
         if "openpose" in filename:
             poses = read_openpose_surrey_format(filename=filename, fps=args.fps)
-        else:
+        elif "mediapipe" in filename:
             raise NotImplementedError
+        else:
+            raise ValueError("Cannot make sense of file: '%s'." % filename)
 
         matching_subtitles = subtitles_by_id[file_id]
 
