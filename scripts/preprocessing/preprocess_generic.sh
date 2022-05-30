@@ -192,7 +192,7 @@ done
 # sizes
 echo "Sizes of all files:"
 
-wc -l $data_sub/*
+ls -l $data_sub/*
 wc -l $shared_models_sub/*
 
 echo "time taken:"
