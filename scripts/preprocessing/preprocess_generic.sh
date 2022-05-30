@@ -113,8 +113,6 @@ for training_corpus in $training_corpora; do
 
 done
 
-exit
-
 # combine training corpora (poses and text separately)
 
 for subset in $ALL_SUBSETS; do
