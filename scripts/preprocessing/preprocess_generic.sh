@@ -59,8 +59,8 @@ DRY_RUN_DEVTEST_SIZE=2
 
 SENTENCEPIECE_VOCAB_SIZE=1000
 
-CORPORA_EXCEPT_TRAIN="dev test"
-ALL_CORPORA="$CORPORA_EXCEPT_TRAIN train"
+SUBSETS_EXCEPT_TRAIN="dev test"
+ALL_SUBSETS="$SUBSETS_EXCEPT_TRAIN train"
 
 echo "data_sub: $data_sub"
 
@@ -109,7 +109,7 @@ done
 
 # combine training corpora (poses and text separately)
 
-for subset in $all_corpora; do
+for subset in $ALL_SUBSETS; do
 
     # all_corpora: train, dev, test
 
@@ -134,11 +134,11 @@ done
 
 # prenormalization for all subsets (targets only from here on)
 
-for corpus in $all_corpora; do
-      cat $data_sub/$corpus.txt | \
+for subset in $ALL_SUBSETS; do
+      cat $data_sub/$subset.txt | \
       perl -CS -pe 'tr[\x{9}\x{A}\x{D}\x{20}-\x{D7FF}\x{E000}-\x{FFFD}\x{10000}-\x{10FFFF}][]cd;' | \
       perl -CS -pe 's/\&\s*\#\s*160\s*\;/ /g' \
-      > $data_sub/$corpus.prenorm.trg
+      > $data_sub/$subset.prenorm.trg
 done
 
 # normalize train data
@@ -152,13 +152,13 @@ cat $data_sub/train.prenorm.trg | \
 
 # normalize dev / test data + other test corpora
 
-for corpus in $corpora_except_train; do
-    cat $data_sub/$corpus.prenorm.trg | \
+for subset in $SUBSETS_EXCEPT_TRAIN; do
+    cat $data_sub/$subset.prenorm.trg | \
     ${TOKENIZER}/replace-unicode-punctuation.perl | \
     ${TOKENIZER}/remove-non-printing-char.perl | \
     ${TOKENIZER}/deescape-special-chars.perl | \
     sed 's/  */ /g;s/^ *//g;s/ *$//g' > \
-        $data_sub/$corpus.normalized.trg
+        $data_sub/$subset.normalized.trg
 done
 
 echo "sentencepiece_vocab_size=$sentencepiece_vocab_size"
@@ -184,11 +184,11 @@ python $scripts/preprocessing/train_sentencepiece.py \
 
 # apply SP model to train, test and dev
 
-for corpus in $all_corpora; do
-    cat $data_sub/$corpus.normalized.trg | \
+for subset in $ALL_SUBSETS; do
+    cat $data_sub/$subset.normalized.trg | \
         python $scripts/preprocessing/apply_sentencepiece.py \
             --model $shared_models_sub/$lang.sentencepiece.model \
-                > $data_sub/$corpus.pieces.trg
+                > $data_sub/$subset.pieces.trg
 done
 
 # sizes
