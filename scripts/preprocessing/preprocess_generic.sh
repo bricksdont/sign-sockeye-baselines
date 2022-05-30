@@ -59,6 +59,8 @@ DRY_RUN_DEVTEST_SIZE=2
 
 SENTENCEPIECE_VOCAB_SIZE=1000
 
+SENTENCEPIECE_MAX_LINES=1000000
+
 SUBSETS_EXCEPT_TRAIN="dev test"
 ALL_SUBSETS="$SUBSETS_EXCEPT_TRAIN train"
 
@@ -165,7 +167,7 @@ echo "sentencepiece_vocab_size=$sentencepiece_vocab_size"
 
 # determine character coverage
 
-num_characters=$(head -n 1000000 $data_sub/train.normalized.trg | python $scripts/num_chars.py | wc -l)
+num_characters=$(head -n 1000000 $data_sub/train.normalized.trg | python $scripts/preprocessing/num_chars.py | wc -l)
 
 if [[ $num_characters -gt 1000 ]]; then
     character_coverage=0.9995
