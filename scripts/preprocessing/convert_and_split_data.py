@@ -353,6 +353,10 @@ def main():
 
     num_examples = sum([len(subtitles) for subtitles in subtitles_by_id.values()])
 
+    if args.train_size is not None:
+        assert num_examples >= args.train_size, \
+           "--train-size cannot be more than the total number of examples (%d)" % num_examples
+
     logging.debug("Subtitles kept/skipped/total: %d/%d/%d" %
                   (num_examples, num_subtitles_skipped, num_examples + num_subtitles_skipped))
 
