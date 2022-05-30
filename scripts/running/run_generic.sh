@@ -129,8 +129,6 @@ id_prepare=$(
 
 echo "  id_prepare: $id_prepare | $logs_sub_sub/slurm-$id_prepare.out"  | tee -a $logs_sub_sub/MAIN
 
-exit
-
 # Sockeye train (depends on prepare)
 
 id_train=$(
@@ -139,10 +137,12 @@ id_train=$(
     --dependency=afterok:$id_prepare \
     $SLURM_LOG_ARGS \
     $scripts/training/train_generic.sh \
-    $base $src $trg $model_name $dry_run $seed $spm_strategy
+    $base $src $trg $model_name $dry_run $seed $pose_type
 )
 
 echo "  id_train: $id_train | $logs_sub_sub/slurm-$id_train.out"  | tee -a $logs_sub_sub/MAIN
+
+exit
 
 # translate test set(s) (depends on train)
 
