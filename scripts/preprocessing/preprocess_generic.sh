@@ -9,9 +9,10 @@ set -u
 # $model_name
 # $dry_run
 # $seed
-# $training_corpus
+# $training_corpora
 # $fps
 # $pose_type
+# $sentencepiece_vocab_size
 
 
 base=$1
@@ -20,9 +21,10 @@ trg=$3
 model_name=$4
 dry_run=$5
 seed=$6
-training_corpus=$7
+training_corpora=$7
 fps=$8
 pose_type=$9
+sentencepiece_vocab_size=${10}
 
 download=$base/download
 data=$base/data
@@ -34,7 +36,6 @@ mkdir -p $shared_models
 
 # subfolders
 
-download_sub=$download/$training_corpus
 data_sub=$data/${src}-${trg}
 shared_models_sub=$shared_models/${src}-${trg}
 
@@ -80,28 +81,61 @@ mkdir -p $data_sub
 # truncate all data if dry run
 
 if [[ $dry_run == "true" ]]; then
-    train_size=$DRY_RUN_TRAIN_SIZE
+    train_size_arg="--train-size $DRY_RUN_TRAIN_SIZE"
     devtest_size=$DRY_RUN_DEVTEST_SIZE
 else
-    train_size="-1"
+    train_size_arg=""
     devtest_size=$DEVTEST_SIZE
 fi
 
-# convert downloaded data to text and h5 format, and create train/dev/test split
+for training_corpus in $training_corpora; do
 
-python $scripts/preprocessing/convert_and_split_data.py \
-    --download-sub $download_sub \
-    --data-sub $data_sub \
-    --seed $seed \
-    --train-size $train_size \
-    --devtest-size $devtest_size \
-    --fps $fps \
-    --pose-type $pose_type
+    download_sub=$download/$training_corpus
 
-# prenormalization for train data
+    # convert downloaded data to text and h5 format, and create train/dev/test split
+
+    # --output-prefix naming logic: [prefix].{dev,test,train}.[for h5: openpose or mediapipe].{txt,h5}.
+
+    python $scripts/preprocessing/convert_and_split_data.py \
+        --download-sub $download_sub \
+        --output-dir $data_sub \
+        --output-prefix $training_corpus \
+        --seed $seed \
+        --devtest-size $devtest_size \
+        --fps $fps \
+        --pose-type $pose_type $train_size_arg
+
+done
+
+# combine training corpora (poses and text separately)
+
+for subset in $all_corpora; do
+
+    # all_corpora: train, dev, test
+
+    touch $data_sub/$subset.txt
+
+    # combine texts
+
+    for training_corpus in $training_corpora; do
+
+        # training corpora: focusnews, srf
+
+        cat $data_sub/$training_corpus.$subset.txt >> $data_sub/$subset.txt
+    done
+
+    # combine pose files
+
+    python $scripts/preprocessing/combine_h5_datasets.py \
+        --inputs $data_sub/*.$subset.h5 \
+        --output $data_sub/$subset.h5
+
+done
+
+# prenormalization for all subsets (targets only from here on)
 
 for corpus in $all_corpora; do
-      cat $data_sub/$corpus.trg | \
+      cat $data_sub/$corpus.txt | \
       perl -CS -pe 'tr[\x{9}\x{A}\x{D}\x{20}-\x{D7FF}\x{E000}-\x{FFFD}\x{10000}-\x{10FFFF}][]cd;' | \
       perl -CS -pe 's/\&\s*\#\s*160\s*\;/ /g' \
       > $data_sub/$corpus.prenorm.trg
@@ -127,20 +161,7 @@ for corpus in $corpora_except_train; do
         $data_sub/$corpus.normalized.trg
 done
 
-# remove sentences from dev if source or target is empty
-# (otherwise leads to potential Sockeye error)
-
-mv $data_sub/dev.$pose_type.h5 $data_sub/dev.before_remove_empty.h5
-mv $data_sub/dev.normalized.trg $data_sub/dev.before_remove_empty.trg
-
-python $scripts/preprocessing/remove_if_source_or_target_empty.py \
-    --input-src $data_sub/dev.before_remove_empty.h5 \
-    --input-trg $data_sub/dev.before_remove_empty.trg \
-    --output-src $data_sub/dev.h5 \
-    --output-trg $data_sub/dev.normalized.trg
-
-
-echo "sentencepiece_vocab_size=$SENTENCEPIECE_VOCAB_SIZE"
+echo "sentencepiece_vocab_size=$sentencepiece_vocab_size"
 
 # learn sentencepiece model on train target
 
@@ -157,7 +178,7 @@ fi
 python $scripts/preprocessing/train_sentencepiece.py \
   --model-prefix $shared_models_sub/trg.sentencepiece \
   --input $data_sub/train.normalized.trg \
-  --vocab-size $SENTENCEPIECE_VOCAB_SIZE \
+  --vocab-size $sentencepiece_vocab_size \
   --character-coverage $character_coverage \
   --input-sentence-size=$SENTENCEPIECE_MAX_LINES
 

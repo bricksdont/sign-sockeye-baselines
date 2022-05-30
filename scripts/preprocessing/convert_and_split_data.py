@@ -79,6 +79,11 @@ def read_subtitles(subtitle_dir: str) -> Dict[str, List[srt.Subtitle]]:
 
         with open(filepath, "r") as handle:
             for subtitle in srt.parse(handle.read()):
+
+                # skip if there is no text content
+                if subtitle.content.strip() == "":
+                    continue
+
                 subtitles.append(subtitle)
 
         subtitles_by_id[file_id] = subtitles
@@ -152,27 +157,30 @@ def extract_parallel_examples(subtitles: List[srt.Subtitle],
 
 class ParallelWriter:
 
-    def __init__(self, data_sub: str, pose_type: str, prefix: str, max_size: Optional[int] = None):
+    def __init__(self, output_dir: str, pose_type: str, subset: str, output_prefix: str, max_size: Optional[int] = None):
         """
 
-        :param data_sub:
+        :param output_dir:
         :param pose_type:
-        :param prefix:
+        :param subset:
+        :param output_prefix:
         :param max_size:
         """
-        assert prefix in ["train", "dev", "test"]
-
-        self.prefix = prefix
-        self.data_sub = data_sub
+        self.output_dir = output_dir
         self.pose_type = pose_type
+
+        assert subset in ["train", "dev", "test"]
+
+        self.subset = subset
+        self.output_prefix = output_prefix
         self.max_size = max_size
 
-        text_output_name = ".".join([self.prefix, "txt"])
-        self.text_output_path = os.path.join(self.data_sub, text_output_name)
+        text_output_name = ".".join([self.output_prefix, self.subset, "txt"])
+        self.text_output_path = os.path.join(self.output_dir, text_output_name)
         self.text_writer = open(self.text_output_path, "w")
 
-        poses_output_name = ".".join([self.prefix, self.pose_type, "h5"])
-        self.poses_output_path = os.path.join(self.data_sub, poses_output_name)
+        poses_output_name = ".".join([self.output_prefix, self.pose_type, self.subset, "h5"])
+        self.poses_output_path = os.path.join(self.output_dir, poses_output_name)
         self.pose_writer = sockeye.h5_io.H5Writer(filename=self.poses_output_path)
 
         self.size = 0
@@ -201,7 +209,7 @@ class ParallelWriter:
 
 
 def decide_on_split(num_examples: int,
-                    train_size: int,
+                    train_size: Optional[int],
                     devtest_size: int,
                     writers: Dict[str, ParallelWriter]) -> Dict[int, ParallelWriter]:
     """
@@ -217,7 +225,7 @@ def decide_on_split(num_examples: int,
 
     # sub-sample if train_size has a limit
 
-    if train_size != -1:
+    if train_size is not None:
         train_indexes = np.random.choice(train_indexes, size=(train_size,), replace=False)
 
     # default: training writer
@@ -249,8 +257,11 @@ def parse_args():
     parser.add_argument("--download-sub", type=str,
                         help="Input folder with original download data which has subfolders 'subtitles'"
                              " 'openpose' and 'mediapipe'.", required=True)
-    parser.add_argument("--data-sub", type=str,
+    parser.add_argument("--output-dir", type=str,
                         help="Output folder to store converted and split data sets.", required=True)
+    parser.add_argument("--output-prefix", type=str,
+                        help="Prefix for output files, naming: "
+                             "[prefix].{dev,test,train}.[for h5: openpose or mediapipe].{txt,h5}.", required=True)
 
     parser.add_argument("--seed", type=int,
                         help="Random seed for data splits.", required=True)
@@ -277,19 +288,22 @@ def main():
 
     np.random.seed(args.seed)
 
-    writer_train = ParallelWriter(data_sub=args.data_sub,
+    writer_train = ParallelWriter(output_dir=args.output_dir,
                                   pose_type=args.pose_type,
-                                  prefix="train",
+                                  subset="train",
+                                  output_prefix=args.output_prefix,
                                   max_size=args.train_size)
 
-    writer_dev = ParallelWriter(data_sub=args.data_sub,
+    writer_dev = ParallelWriter(output_dir=args.output_dir,
                                 pose_type=args.pose_type,
-                                prefix="dev",
+                                subset="dev",
+                                output_prefix=args.output_prefix,
                                 max_size=args.devtest_size)
 
-    writer_test = ParallelWriter(data_sub=args.data_sub,
+    writer_test = ParallelWriter(output_dir=args.output_dir,
                                  pose_type=args.pose_type,
-                                 prefix="test",
+                                 subset="test",
+                                 output_prefix=args.output_prefix,
                                  max_size=args.devtest_size)
 
     writers = {"train": writer_train, "dev": writer_dev, "test": writer_test}
@@ -323,6 +337,10 @@ def main():
         matching_subtitles = subtitles_by_id[file_id]
 
         for text, pose_slice in extract_parallel_examples(poses=poses, subtitles=matching_subtitles, fps=args.fps):
+
+            if example_id not in writers_by_id.keys():
+                # train size has a limit and this example ID is not in the random sample
+                continue
 
             writer = writers_by_id[example_id]
             writer.add(text=text, pose_slice=pose_slice)

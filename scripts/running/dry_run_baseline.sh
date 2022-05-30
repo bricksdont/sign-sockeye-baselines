@@ -16,6 +16,8 @@ dry_run="true"
 
 model_name="dry_run"
 
+pose_type="openpose"
+
 training_corpora="focusnews"
 testing_corpora="test"
 

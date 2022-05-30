@@ -13,6 +13,7 @@
 # $seed
 # $fps
 # $pose_type
+# $sentencepiece_vocab_size
 
 module load volta nvidia/cuda10.2-cudnn7.6.5 anaconda3
 
@@ -55,6 +56,10 @@ if [ -z "$seed" ]; then
     seed="1"
 fi
 
+if [ -z "$sentencepiece_vocab_size" ]; then
+    sentencepiece_vocab_size="1000"
+fi
+
 # SLURM job args
 
 DRY_RUN_SLURM_ARGS="--cpus-per-task=2 --time=02:00:00 --mem=16G --partition=generic"
@@ -95,8 +100,6 @@ id_download=$(
 
 echo "  id_download: $id_download | $logs_sub_sub/slurm-$id_download.out" | tee -a $logs_sub_sub/MAIN
 
-exit
-
 # preprocess: Combine datasets, hold out data, normalize, SPM (depends on download)
 
 id_preprocess=$(
@@ -105,11 +108,13 @@ id_preprocess=$(
     --dependency=afterok:$id_download \
     $SLURM_LOG_ARGS \
     $scripts/preprocessing/preprocess_generic.sh \
-    $base $src $trg $model_name $dry_run $seed $multilingual $logs_sub_sub/LANGPAIRS.sh \
-    $spm_strategy $lowercase_glosses $generalize_dgs_glosses
+    $base $src $trg $model_name $dry_run $seed "$training_corpora" \
+    $fps $pose_type $sentencepiece_vocab_size
 )
 
 echo "  id_preprocess: $id_preprocess | $logs_sub_sub/slurm-$id_preprocess.out" | tee -a $logs_sub_sub/MAIN
+
+exit
 
 # Sockeye prepare (depends on preprocess)
 

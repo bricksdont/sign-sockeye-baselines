@@ -12,6 +12,8 @@ trg="de"
 
 model_name="baseline"
 
+pose_type="openpose"
+
 training_corpora="focusnews"
 testing_corpora="test"
 
