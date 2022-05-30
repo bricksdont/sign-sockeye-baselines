@@ -33,7 +33,7 @@ def main():
 
     for reader in readers:
         for sample in reader.iterate():
-            writer.write(sample)
+            writer.add(sample)
 
     writer.close()
 
