@@ -14,6 +14,7 @@ src=$2
 trg=$3
 model_name=$4
 seed=$5
+pose_type=$6
 
 # measure time
 
