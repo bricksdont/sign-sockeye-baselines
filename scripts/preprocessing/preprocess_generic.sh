@@ -1,7 +1,5 @@
 #! /bin/bash
 
-set -u
-
 # calling process needs to set:
 # $base
 # $src
@@ -48,6 +46,10 @@ mkdir -p $shared_models_sub
 
 eval "$(conda shell.bash hook)"
 source activate $venvs/sockeye3
+
+# after ativating the env on purpose
+
+set -u
 
 MOSES=$base/tools/moses-scripts/scripts
 TOKENIZER=$MOSES/tokenizer
