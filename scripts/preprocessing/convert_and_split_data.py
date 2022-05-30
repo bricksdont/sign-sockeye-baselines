@@ -146,10 +146,21 @@ def extract_parallel_examples(subtitles: List[srt.Subtitle],
     :param fps:
     :return:
     """
+    pose_num_frames = poses.body.data.shape[0]
+
+    assert pose_num_frames > 0, "Pose object has zero frames."
 
     for subtitle in subtitles:
         start_frame = convert_srt_time_to_frame(subtitle.start, fps=fps)
         end_frame = convert_srt_time_to_frame(subtitle.end, fps=fps)
+
+        assert start_frame < end_frame, "Start time of subtitle must be earlier than end time: '%s'" % str(subtitle)
+
+        assert start_frame < pose_num_frames, "Start frame: '%d' must be lower than number of pose frames: '%d'." % \
+                                              (start_frame, pose_num_frames)
+
+        assert end_frame <= pose_num_frames, "End frame: '%d' must be lower or equal to number of pose frames: '%d'." % \
+                                             (end_frame, pose_num_frames)
 
         pose_slice = poses.body.data[start_frame:end_frame]
         pose_slice = reduce_pose_slice(pose_slice)
@@ -159,7 +170,8 @@ def extract_parallel_examples(subtitles: List[srt.Subtitle],
 
 class ParallelWriter:
 
-    def __init__(self, output_dir: str, pose_type: str, subset: str, output_prefix: str, max_size: Optional[int] = None):
+    def __init__(self, output_dir: str, pose_type: str, subset: str, output_prefix: str,
+                 max_size: Optional[int] = None):
         """
 
         :param output_dir:
