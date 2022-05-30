@@ -142,8 +142,6 @@ id_train=$(
 
 echo "  id_train: $id_train | $logs_sub_sub/slurm-$id_train.out"  | tee -a $logs_sub_sub/MAIN
 
-exit
-
 # translate test set(s) (depends on train)
 
 id_translate=$(
@@ -152,10 +150,12 @@ id_translate=$(
     --dependency=afterany:$id_train \
     $SLURM_LOG_ARGS \
     $scripts/translation/translate_generic.sh \
-    $base $src $trg $model_name $dry_run "$testing_corpora" $multilingual $logs_sub_sub/LANGPAIRS.sh $spm_strategy
+    $base $src $trg $model_name $dry_run "$testing_corpora"
 )
 
 echo "  id_translate: $id_translate | $logs_sub_sub/slurm-$id_translate.out"  | tee -a $logs_sub_sub/MAIN
+
+exit
 
 # evaluate BLEU and other metrics (depends on translate)
 

@@ -37,6 +37,10 @@ mkdir -p $models_sub_sub
 eval "$(conda shell.bash hook)"
 source activate $venvs/sockeye3
 
+# after ativating the env on purpose
+
+set -u
+
 # parameters are the same for all Transformer models
 
 num_embed="512:512"
@@ -86,7 +90,7 @@ elif [[ $num_lines -gt ${SMALLEST_TRAINSIZE} ]]; then
     decode_and_evaluate=500
     checkpoint_interval=1000
 else
-    echo "Warning: training data size appeaars too small to train a model"
+    echo "Warning: training data size appears too small to train a model"
     embed_dropout=0.5
     transformer_dropout=0.5
     batch_size=1024
