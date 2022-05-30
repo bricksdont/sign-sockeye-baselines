@@ -85,7 +85,7 @@ def subtitle_is_usable(subtitle: srt.Subtitle, fps: int) -> bool:
     return True
 
 
-def read_subtitles(subtitle_dir: str, fps: int) -> Dict[str, List[srt.Subtitle]]:
+def read_subtitles(subtitle_dir: str, fps: int) -> Tuple[Dict[str, List[srt.Subtitle]], int]:
     """
 
     :param subtitle_dir:
@@ -94,6 +94,8 @@ def read_subtitles(subtitle_dir: str, fps: int) -> Dict[str, List[srt.Subtitle]]
     """
 
     subtitles_by_id = {}  # type: Dict[str, List[srt.Subtitle]]
+
+    num_subtitles_skipped = 0
 
     for filename in os.listdir(subtitle_dir):
         filepath = os.path.join(subtitle_dir, filename)
@@ -107,13 +109,14 @@ def read_subtitles(subtitle_dir: str, fps: int) -> Dict[str, List[srt.Subtitle]]
 
                 # skip if there is no text content or times do not make sense
                 if not subtitle_is_usable(subtitle=subtitle, fps=fps):
+                    num_subtitles_skipped += 1
                     continue
 
                 subtitles.append(subtitle)
 
         subtitles_by_id[file_id] = subtitles
 
-    return subtitles_by_id
+    return subtitles_by_id, num_subtitles_skipped
 
 
 def miliseconds_to_frame_index(miliseconds: int, fps: int) -> int:
@@ -346,9 +349,13 @@ def main():
     # load all subtitles (since they don't use a lot of memory)
 
     subtitle_dir = os.path.join(args.download_sub, "subtitles")
-    subtitles_by_id = read_subtitles(subtitle_dir, fps=args.fps)
+    subtitles_by_id, num_subtitles_skipped = read_subtitles(subtitle_dir, fps=args.fps)
 
     num_examples = sum([len(subtitles) for subtitles in subtitles_by_id.values()])
+
+    logging.debug("Subtitles kept/skipped/total: %d/%d/%d" %
+                  (num_examples, num_subtitles_skipped, num_examples + num_subtitles_skipped))
+
     writers_by_id = decide_on_split(num_examples=num_examples,
                                     train_size=args.train_size,
                                     devtest_size=args.devtest_size,
