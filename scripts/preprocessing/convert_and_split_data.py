@@ -383,7 +383,13 @@ def main():
 
     example_id = 0
 
+    dry_run_break_early = False
+
     for filename in tqdm(os.listdir(pose_dir)):
+
+        if dry_run_break_early:
+            break
+
         file_id = get_file_id(filename)
 
         filepath = os.path.join(pose_dir, filename)
@@ -393,13 +399,18 @@ def main():
         elif "mediapipe" in filename:
             raise NotImplementedError
         else:
-            raise ValueError("Cannot make sense of file: '%s'." % filename)
+            raise ValueError("Cannot make sense of pose file: '%s'." % filename)
 
         matching_subtitles = subtitles_by_id[file_id]
 
         for text, pose_slice in extract_parallel_examples(poses=poses, subtitles=matching_subtitles, fps=args.fps):
 
             if example_id not in writers_by_id.keys():
+                # if dry run, we can end the loops now
+                if args.dry_run:
+                    dry_run_break_early = True
+                    break
+
                 # train size has a limit and this example ID is not in the random sample
                 continue
 
