@@ -10,6 +10,7 @@ import logging
 
 import numpy as np
 
+from tqdm import tqdm
 from typing import List, Dict, Iterator, Tuple, Optional
 
 # noinspection PyUnresolvedReferences
@@ -63,10 +64,32 @@ def get_file_id(filename: str) -> str:
     return parts[1]
 
 
-def read_subtitles(subtitle_dir: str) -> Dict[str, List[srt.Subtitle]]:
+def subtitle_is_usable(subtitle: srt.Subtitle, fps: int) -> bool:
+    """
+
+    :param subtitle:
+    :param fps:
+    :return:
+    """
+    if subtitle.content.strip() == "":
+        return False
+
+    start_frame = convert_srt_time_to_frame(subtitle.start, fps=fps)
+    end_frame = convert_srt_time_to_frame(subtitle.end, fps=fps)
+
+    # TODO: once our sentence segmentation is improved this should not happen anymore perhaps and can be a strict check
+
+    if not start_frame < end_frame:
+        return False
+
+    return True
+
+
+def read_subtitles(subtitle_dir: str, fps: int) -> Dict[str, List[srt.Subtitle]]:
     """
 
     :param subtitle_dir:
+    :param fps:
     :return:
     """
 
@@ -82,8 +105,8 @@ def read_subtitles(subtitle_dir: str) -> Dict[str, List[srt.Subtitle]]:
         with open(filepath, "r") as handle:
             for subtitle in srt.parse(handle.read()):
 
-                # skip if there is no text content
-                if subtitle.content.strip() == "":
+                # skip if there is no text content or times do not make sense
+                if not subtitle_is_usable(subtitle=subtitle, fps=fps):
                     continue
 
                 subtitles.append(subtitle)
@@ -148,13 +171,11 @@ def extract_parallel_examples(subtitles: List[srt.Subtitle],
     """
     pose_num_frames = poses.body.data.shape[0]
 
-    assert pose_num_frames > 0, "Pose object has zero frames."
+    assert pose_num_frames > 0, "Pose object for entire video has zero frames."
 
     for subtitle in subtitles:
         start_frame = convert_srt_time_to_frame(subtitle.start, fps=fps)
         end_frame = convert_srt_time_to_frame(subtitle.end, fps=fps)
-
-        assert start_frame < end_frame, "Start time of subtitle must be earlier than end time: '%s'" % str(subtitle)
 
         assert start_frame < pose_num_frames, "Start frame: '%d' must be lower than number of pose frames: '%d'." % \
                                               (start_frame, pose_num_frames)
@@ -325,7 +346,7 @@ def main():
     # load all subtitles (since they don't use a lot of memory)
 
     subtitle_dir = os.path.join(args.download_sub, "subtitles")
-    subtitles_by_id = read_subtitles(subtitle_dir)
+    subtitles_by_id = read_subtitles(subtitle_dir, fps=args.fps)
 
     num_examples = sum([len(subtitles) for subtitles in subtitles_by_id.values()])
     writers_by_id = decide_on_split(num_examples=num_examples,
@@ -340,7 +361,7 @@ def main():
 
     example_id = 0
 
-    for filename in os.listdir(pose_dir):
+    for filename in tqdm(os.listdir(pose_dir)):
         file_id = get_file_id(filename)
 
         filepath = os.path.join(pose_dir, filename)
