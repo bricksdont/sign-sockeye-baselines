@@ -3,6 +3,7 @@
 import os
 import datetime
 import srt
+import cv2
 import tarfile
 import tempfile
 import argparse
@@ -72,6 +73,7 @@ def subtitle_is_usable(subtitle: srt.Subtitle, fps: int) -> bool:
     :return:
     """
     if subtitle.content.strip() == "":
+        logging.debug("Skipping empty subtitle: %s" % str(subtitle))
         return False
 
     start_frame = convert_srt_time_to_frame(subtitle.start, fps=fps)
@@ -80,16 +82,52 @@ def subtitle_is_usable(subtitle: srt.Subtitle, fps: int) -> bool:
     # TODO: once our sentence segmentation is improved this should not happen anymore perhaps and can be a strict check
 
     if not start_frame < end_frame:
+        logging.debug("Skipping subtitle where start frame is equal or higher than end frame: %s" % str(subtitle))
         return False
 
     return True
 
 
-def read_subtitles(subtitle_dir: str, fps: int) -> Tuple[Dict[str, List[srt.Subtitle]], int]:
+def get_framerate(filename: str) -> int:
+    """
+    Get framerate from mp4 video.
+
+    :param filename:
+    :return:
+    """
+    cap = cv2.VideoCapture(filename)
+    fps = cap.get(cv2.CAP_PROP_FPS)
+
+    cap.release()
+
+    return fps
+
+
+def read_video_framerates(video_dir: str) -> Dict[str, int]:
+    """
+
+    :param video_dir:
+    :return:
+    """
+    framerate_by_id = {}  # type: Dict[str, int]
+
+    for filename in os.listdir(video_dir):
+        filepath = os.path.join(video_dir, filename)
+
+        file_id = get_file_id(filename)
+        framerate = get_framerate(filepath)
+
+        framerate_by_id[file_id] = framerate
+
+    return framerate_by_id
+
+
+def read_subtitles(subtitle_dir: str,
+                   framerate_by_id: Dict[str, int]) -> Tuple[Dict[str, List[srt.Subtitle]], int]:
     """
 
     :param subtitle_dir:
-    :param fps:
+    :param framerate_by_id:
     :return:
     """
 
@@ -101,6 +139,7 @@ def read_subtitles(subtitle_dir: str, fps: int) -> Tuple[Dict[str, List[srt.Subt
         filepath = os.path.join(subtitle_dir, filename)
 
         file_id = get_file_id(filename)
+        fps = framerate_by_id[file_id]
 
         subtitles = []  # type: List[srt.Subtitle]
 
@@ -182,7 +221,6 @@ def extract_parallel_examples(subtitles: List[srt.Subtitle],
 
         assert start_frame < pose_num_frames, "Start frame: '%d' must be lower than number of pose frames: '%d'. Subtitle: %s" % \
                                               (start_frame, pose_num_frames, str(subtitle))
-
 
         # TODO: once we fix this problem upstream this should not happen anymore and can be a strict assertion again
 
@@ -307,7 +345,7 @@ def parse_args():
 
     parser.add_argument("--download-sub", type=str,
                         help="Input folder with original download data which has subfolders 'subtitles'"
-                             " 'openpose' and 'mediapipe'.", required=True)
+                             " 'openpose', 'mediapipe' and 'videos'.", required=True)
     parser.add_argument("--output-dir", type=str,
                         help="Output folder to store converted and split data sets.", required=True)
     parser.add_argument("--output-prefix", type=str,
@@ -323,8 +361,6 @@ def parse_args():
     parser.add_argument("--dry-run", action="store_true",
                         help="Whether this is a dry run only.", required=False)
 
-    parser.add_argument("--fps", type=int,
-                        help="Framerate.", required=True)
     parser.add_argument("--pose-type", type=str,
                         help="Type of poses (openpose or mediapipe).", required=True, choices=["openpose", "mediapipe"])
 
@@ -361,10 +397,15 @@ def main():
 
     writers = {"train": writer_train, "dev": writer_dev, "test": writer_test}
 
+    # load framerates of all videos (could be different for each one)
+
+    video_dir = os.path.join(args.download_sub, "videos")
+    framerate_by_id = read_video_framerates(video_dir=video_dir)
+
     # load all subtitles (since they don't use a lot of memory)
 
     subtitle_dir = os.path.join(args.download_sub, "subtitles")
-    subtitles_by_id, num_subtitles_skipped = read_subtitles(subtitle_dir, fps=args.fps)
+    subtitles_by_id, num_subtitles_skipped = read_subtitles(subtitle_dir, framerate_by_id=framerate_by_id)
 
     num_examples = sum([len(subtitles) for subtitles in subtitles_by_id.values()])
 
@@ -397,10 +438,12 @@ def main():
 
         file_id = get_file_id(filename)
 
+        fps = framerate_by_id[file_id]
+
         filepath = os.path.join(pose_dir, filename)
 
         if "openpose" in filename:
-            poses = read_openpose_surrey_format(filepath=filepath, fps=args.fps)
+            poses = read_openpose_surrey_format(filepath=filepath, fps=fps)
         elif "mediapipe" in filename:
             raise NotImplementedError
         else:
@@ -408,7 +451,7 @@ def main():
 
         matching_subtitles = subtitles_by_id[file_id]
 
-        for text, pose_slice in extract_parallel_examples(poses=poses, subtitles=matching_subtitles, fps=args.fps):
+        for text, pose_slice in extract_parallel_examples(poses=poses, subtitles=matching_subtitles, fps=fps):
 
             if example_id not in writers_by_id.keys():
                 # if dry run, we can end the loops now
