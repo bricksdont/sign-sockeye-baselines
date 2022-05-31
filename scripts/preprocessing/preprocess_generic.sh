@@ -125,7 +125,7 @@ for subset in $ALL_SUBSETS; do
 
         # training corpora: focusnews, srf
 
-        cat $data_sub/$training_corpus.$subset.trg >> $data_sub/$subset.trg
+        cat $data_sub/$training_corpus.$subset.txt >> $data_sub/$subset.trg
     done
 
     # combine pose files
