@@ -14,7 +14,7 @@ dry_run="true"
 
 # baseline
 
-model_name="dry_run"
+model_name="dry_run_srf"
 
 pose_type="openpose"
 
