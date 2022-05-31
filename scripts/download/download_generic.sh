@@ -34,7 +34,11 @@ for training_corpus in $training_corpora; do
     # stand-in for actual download from an online source: link to local files
     # TODO: change once our data is online
 
-    original_data_sub=$original_data/$training_corpus
+    if [[ $training_corpus == "srf" ]]; then
+        original_data_sub=$original_data/$training_corpus/parallel
+    else
+        original_data_sub=$original_data/$training_corpus
+    fi
 
     for sub_folder in subtitles openpose mediapipe; do
         original_data_sub_sub=$original_data_sub/$sub_folder
