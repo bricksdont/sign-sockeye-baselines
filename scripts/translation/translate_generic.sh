@@ -65,7 +65,7 @@ fi
 
 for test_corpus in $testing_corpora; do
 
-    input=$data_sub_sub/$test_corpus.h5
+    input=$data_sub_sub/$test_corpus.src
     output_pieces=$translations_sub_sub/$test_corpus.pieces.trg
     output=$translations_sub_sub/$test_corpus.trg
 

@@ -52,13 +52,13 @@ else
     num_features="TODO"
 fi
 
-cmd="python -m sockeye.prepare_data -s $data_sub_sub/train.h5 -t $data_sub_sub/train.pieces.trg -o $prepared_sub_sub --max-seq-len 500:250 --seed $seed --source-is-continuous --source-continuous-num-features $num_features"
+cmd="python -m sockeye.prepare_data -s $data_sub_sub/train.src -t $data_sub_sub/train.pieces.trg -o $prepared_sub_sub --max-seq-len 500:250 --seed $seed --source-is-continuous --source-continuous-num-features $num_features"
 
 echo "Executing:"
 echo "$cmd"
 
 python -m sockeye.prepare_data \
-                        -s $data_sub_sub/train.h5 \
+                        -s $data_sub_sub/train.src \
                         -t $data_sub_sub/train.pieces.trg \
                         -o $prepared_sub_sub \
                         --max-seq-len 500:250 \

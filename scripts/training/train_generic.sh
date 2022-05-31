@@ -134,7 +134,7 @@ fi
 
 python -m sockeye.train \
 -d $prepared_sub_sub \
--vs $data_sub_sub/dev.h5 \
+-vs $data_sub_sub/dev.src \
 -vt $data_sub_sub/dev.pieces.trg \
 --output $models_sub_sub \
 --seed $seed \

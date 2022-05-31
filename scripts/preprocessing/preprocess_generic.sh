@@ -117,7 +117,7 @@ done
 
 for subset in $ALL_SUBSETS; do
 
-    touch $data_sub/$subset.txt
+    touch $data_sub/$subset.trg
 
     # combine texts
 
@@ -125,21 +125,21 @@ for subset in $ALL_SUBSETS; do
 
         # training corpora: focusnews, srf
 
-        cat $data_sub/$training_corpus.$subset.txt >> $data_sub/$subset.txt
+        cat $data_sub/$training_corpus.$subset.trg >> $data_sub/$subset.trg
     done
 
     # combine pose files
 
     python $scripts/preprocessing/combine_h5_datasets.py \
         --inputs $data_sub/*.$subset.h5 \
-        --output $data_sub/$subset.h5
+        --output $data_sub/$subset.src
 
 done
 
 # prenormalization for all subsets (targets only from here on)
 
 for subset in $ALL_SUBSETS; do
-      cat $data_sub/$subset.txt | \
+      cat $data_sub/$subset.trg | \
       perl -CS -pe 'tr[\x{9}\x{A}\x{D}\x{20}-\x{D7FF}\x{E000}-\x{FFFD}\x{10000}-\x{10FFFF}][]cd;' | \
       perl -CS -pe 's/\&\s*\#\s*160\s*\;/ /g' \
       > $data_sub/$subset.prenorm.trg
@@ -198,7 +198,10 @@ done
 # sizes
 echo "Sizes of all files:"
 
-ls -lh $data_sub/*.h5
+# sources are h5 files
+
+ls -lh $data_sub/*.src
+
 wc -l $data_sub/*.txt
 wc -l $data_sub/*.trg
 wc -l $shared_models_sub/*
