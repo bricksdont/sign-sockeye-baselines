@@ -180,11 +180,11 @@ def extract_parallel_examples(subtitles: List[srt.Subtitle],
         start_frame = convert_srt_time_to_frame(subtitle.start, fps=fps)
         end_frame = convert_srt_time_to_frame(subtitle.end, fps=fps)
 
-        assert start_frame < pose_num_frames, "Start frame: '%d' must be lower than number of pose frames: '%d'." % \
-                                              (start_frame, pose_num_frames)
+        assert start_frame < pose_num_frames, "Start frame: '%d' must be lower than number of pose frames: '%d'. Subtitle: %s" % \
+                                              (start_frame, pose_num_frames, str(subtitle))
 
-        assert end_frame <= pose_num_frames, "End frame: '%d' must be lower or equal to number of pose frames: '%d'." % \
-                                             (end_frame, pose_num_frames)
+        assert end_frame <= pose_num_frames, "End frame: '%d' must be lower or equal to number of pose frames: '%d'. Subtitle: %s" % \
+                                             (start_frame, pose_num_frames, str(subtitle))
 
         pose_slice = poses.body.data[start_frame:end_frame]
         pose_slice = reduce_pose_slice(pose_slice)
