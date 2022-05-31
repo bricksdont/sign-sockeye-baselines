@@ -183,8 +183,13 @@ def extract_parallel_examples(subtitles: List[srt.Subtitle],
         assert start_frame < pose_num_frames, "Start frame: '%d' must be lower than number of pose frames: '%d'. Subtitle: %s" % \
                                               (start_frame, pose_num_frames, str(subtitle))
 
-        assert end_frame <= pose_num_frames, "End frame: '%d' must be lower or equal to number of pose frames: '%d'. Subtitle: %s" % \
-                                             (start_frame, pose_num_frames, str(subtitle))
+
+        # TODO: once we fix this problem upstream this should not happen anymore and can be a strict assertion again
+
+        if end_frame > pose_num_frames:
+            logging.debug("End frame: '%d' is higher than number of pose frames: '%d'. Subtitle: %s" % \
+                          (end_frame, pose_num_frames, str(subtitle)))
+            end_frame = pose_num_frames
 
         pose_slice = poses.body.data[start_frame:end_frame]
         pose_slice = reduce_pose_slice(pose_slice)
