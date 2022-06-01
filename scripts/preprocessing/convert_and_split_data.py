@@ -19,6 +19,7 @@ from typing import List, Dict, Iterator, Tuple, Optional
 # noinspection PyUnresolvedReferences
 from sockeye import h5_io
 from pose_format import Pose
+from pose_format.numpy import NumPyPoseBody
 from pose_format.utils.openpose import load_openpose_directory
 
 
@@ -67,23 +68,19 @@ def get_file_id(filename: str) -> str:
     return parts[1]
 
 
-def subtitle_is_usable(subtitle: srt.Subtitle, fps: int) -> bool:
+def subtitle_is_usable(subtitle: srt.Subtitle) -> bool:
     """
 
     :param subtitle:
-    :param fps:
     :return:
     """
     if subtitle.content.strip() == "":
         logging.debug("Skipping empty subtitle: %s" % str(subtitle))
         return False
 
-    start_frame = convert_srt_time_to_frame(subtitle.start, fps=fps)
-    end_frame = convert_srt_time_to_frame(subtitle.end, fps=fps)
-
     # TODO: once our sentence segmentation is improved this should not happen anymore perhaps and can be a strict check
 
-    if not start_frame < end_frame:
+    if not subtitle.start < subtitle.end:
         logging.debug("Skipping subtitle where start frame is equal or higher than end frame: %s" % str(subtitle))
         return False
 
@@ -102,7 +99,7 @@ def get_framerate(filename: str) -> int:
 
     cap.release()
 
-    return fps
+    return int(fps)
 
 
 def read_video_framerates(video_dir: str) -> Dict[str, int]:
@@ -124,12 +121,10 @@ def read_video_framerates(video_dir: str) -> Dict[str, int]:
     return framerate_by_id
 
 
-def read_subtitles(subtitle_dir: str,
-                   framerate_by_id: Dict[str, int]) -> Tuple[Dict[str, List[srt.Subtitle]], int]:
+def read_subtitles(subtitle_dir: str) -> Tuple[Dict[str, List[srt.Subtitle]], int]:
     """
 
     :param subtitle_dir:
-    :param framerate_by_id:
     :return:
     """
 
@@ -141,7 +136,6 @@ def read_subtitles(subtitle_dir: str,
         filepath = os.path.join(subtitle_dir, filename)
 
         file_id = get_file_id(filename)
-        fps = framerate_by_id[file_id]
 
         subtitles = []  # type: List[srt.Subtitle]
 
@@ -149,7 +143,7 @@ def read_subtitles(subtitle_dir: str,
             for subtitle in srt.parse(handle.read()):
 
                 # skip if there is no text content or times do not make sense
-                if not subtitle_is_usable(subtitle=subtitle, fps=fps):
+                if not subtitle_is_usable(subtitle=subtitle):
                     num_subtitles_skipped += 1
                     continue
 
@@ -216,9 +210,47 @@ def get_subtitle_content(subtitle: srt.Subtitle) -> str:
     return content
 
 
+def convert_fps_30_to_25(poses: Pose) -> Pose:
+    """
+    Based on:
+    https://stackoverflow.com/a/21922346/1987598
+
+    :param poses:
+    :return:
+    """
+    delete_indexes = np.arange(0, poses.body.data.shape[0], 6)
+
+    new_data = np.delete(poses.body.data, delete_indexes, axis=0)
+    new_confidence = np.delete(poses.body.confidence, delete_indexes, axis=0)
+
+    new_posebody = NumPyPoseBody(fps=25, data=new_data, confidence=new_confidence)
+
+    return Pose(header=poses.header, body=new_posebody)
+
+
+def convert_pose_framerate(poses: Pose, video_fps: int, target_fps: int) -> Pose:
+    """
+
+    :param poses:
+    :param video_fps:
+    :param target_fps:
+    :return:
+    """
+    # base case
+    if video_fps == target_fps:
+        return poses
+    elif video_fps == (2 * target_fps):
+        return poses.slice_step(2)
+    elif video_fps == 30 and target_fps == 25:
+        return convert_fps_30_to_25(poses)
+    else:
+        raise ValueError("Cannot convert between video_fps: %d and target_fps: %d." % (video_fps, target_fps))
+
+
 def extract_parallel_examples(subtitles: List[srt.Subtitle],
                               poses: Pose,
-                              fps: int) -> Iterator[Tuple[str, np.array]]:
+                              video_fps: int,
+                              target_fps: Optional[int]) -> Iterator[Tuple[str, np.array]]:
     """
 
     :param subtitles: Example:
@@ -227,16 +259,24 @@ def extract_parallel_examples(subtitles: List[srt.Subtitle],
                                end=datetime.timedelta(seconds=38, microseconds=97000),
                                content='地球上只有3%的水是淡水', proprietary='')
     :param poses: Array dimensions: (frames, person, points, dimensions)
-    :param fps:
+    :param video_fps:
+    :param target_fps:
     :return:
     """
+    poses = convert_pose_framerate(poses=poses, video_fps=video_fps, target_fps=target_fps)
+
     pose_num_frames = poses.body.data.shape[0]
 
     assert pose_num_frames > 0, "Pose object for entire video has zero frames."
 
+    if target_fps is None:
+        subtitle_fps = video_fps
+    else:
+        subtitle_fps = target_fps
+
     for subtitle in subtitles:
-        start_frame = convert_srt_time_to_frame(subtitle.start, fps=fps)
-        end_frame = convert_srt_time_to_frame(subtitle.end, fps=fps)
+        start_frame = convert_srt_time_to_frame(subtitle.start, fps=subtitle_fps)
+        end_frame = convert_srt_time_to_frame(subtitle.end, fps=subtitle_fps)
 
         assert start_frame < pose_num_frames, "Start frame: '%d' must be lower than number of pose frames: '%d'. Subtitle: %s" % \
                                               (start_frame, pose_num_frames, str(subtitle))
@@ -384,6 +424,8 @@ def parse_args():
 
     parser.add_argument("--pose-type", type=str,
                         help="Type of poses (openpose or mediapipe).", required=True, choices=["openpose", "mediapipe"])
+    parser.add_argument("--target-fps", type=int, default=None,
+                        help="If poses have a different framerate, force a conversion to this framerate.", required=False)
 
     args = parser.parse_args()
 
@@ -429,7 +471,7 @@ def main():
     # load all subtitles (since they don't use a lot of memory)
 
     subtitle_dir = os.path.join(args.download_sub, "subtitles")
-    subtitles_by_id, num_subtitles_skipped = read_subtitles(subtitle_dir, framerate_by_id=framerate_by_id)
+    subtitles_by_id, num_subtitles_skipped = read_subtitles(subtitle_dir)
 
     num_examples = sum([len(subtitles) for subtitles in subtitles_by_id.values()])
 
@@ -462,12 +504,12 @@ def main():
 
         file_id = get_file_id(filename)
 
-        fps = framerate_by_id[file_id]
+        video_fps = framerate_by_id[file_id]
 
         filepath = os.path.join(pose_dir, filename)
 
         if "openpose" in filename:
-            poses = read_openpose_surrey_format(filepath=filepath, fps=fps)
+            poses = read_openpose_surrey_format(filepath=filepath, fps=video_fps)
         elif "mediapipe" in filename:
             # TODO: add function to extract and convert mediapipe
             raise NotImplementedError
@@ -476,7 +518,10 @@ def main():
 
         matching_subtitles = subtitles_by_id[file_id]
 
-        for text, pose_slice in extract_parallel_examples(poses=poses, subtitles=matching_subtitles, fps=fps):
+        for text, pose_slice in extract_parallel_examples(poses=poses,
+                                                          subtitles=matching_subtitles,
+                                                          video_fps=video_fps,
+                                                          target_fps=args.target_fps):
 
             if example_id not in writers_by_id.keys():
                 # if dry run, we can end the loops now
