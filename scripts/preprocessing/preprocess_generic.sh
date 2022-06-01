@@ -108,7 +108,6 @@ for training_corpus in $training_corpora; do
         --output-prefix $training_corpus \
         --seed $seed \
         --devtest-size $devtest_size \
-        --fps $fps \
         --pose-type $pose_type $train_size_arg $dry_run_arg
 
 done
