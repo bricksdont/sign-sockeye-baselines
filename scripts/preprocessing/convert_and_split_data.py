@@ -13,6 +13,7 @@ import logging
 import numpy as np
 
 from tqdm import tqdm
+from collections import Counter
 from typing import List, Dict, Iterator, Tuple, Optional
 
 # noinspection PyUnresolvedReferences
@@ -421,6 +422,9 @@ def main():
 
     video_dir = os.path.join(args.download_sub, "videos")
     framerate_by_id = read_video_framerates(video_dir=video_dir)
+
+    framerate_counter = Counter(framerate_by_id.values())
+    logging.debug("Distribution of framerates: %s", str(framerate_counter))
 
     # load all subtitles (since they don't use a lot of memory)
 
