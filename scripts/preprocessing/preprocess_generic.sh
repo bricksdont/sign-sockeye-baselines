@@ -153,7 +153,7 @@ python $scripts/preprocessing/convert_and_split_data.py \
         --output-prefix unseen \
         --seed $seed \
         --devtest-size 0 \
-        --pose-type $pose_type $dry_run_arg $target_fps_arg
+        --pose-type $pose_type $train_size_arg $dry_run_arg $target_fps_arg
 
 # delete unused files and move to correct file extensions
 
