@@ -19,9 +19,13 @@ mkdir -p $download
 
 original_data=/net/cephfs/shares/volk.cl.uzh/EASIER/WMT_Shared_Task/
 
-for training_corpus in $training_corpora; do
+# also link our unseen test data (local links, participants will not have access to this)
 
-    download_sub=$download/$training_corpus
+all_corpora="$training_corpora test"
+
+for corpus in $all_corpora; do
+
+    download_sub=$download/$corpus
 
     if [[ -d $download_sub ]]; then
           echo "download_sub already exists: $download_sub"
@@ -34,10 +38,10 @@ for training_corpus in $training_corpora; do
     # stand-in for actual download from an online source: link to local files
     # TODO: change once our data is online
 
-    if [[ $training_corpus == "srf" ]]; then
-        original_data_sub=$original_data/$training_corpus/parallel
+    if [[ $corpus == "srf" ]]; then
+        original_data_sub=$original_data/$corpus/parallel
     else
-        original_data_sub=$original_data/$training_corpus
+        original_data_sub=$original_data/$corpus
     fi
 
     for sub_folder in subtitles openpose mediapipe videos; do

@@ -48,6 +48,9 @@ A baseline using SRF data:
 
 ## Ideas for improving this baseline
 
+- find bugs :-)
+- use both SRF and focusnews training data in the same system
+- also use monolingual subtitles (around 2000 files)
 - openpose do not take the first person's keypoints, be more elaborate
 - different / better normalization or scaling of poses
 - augmentation, frame dropout from pose_format
