@@ -200,7 +200,10 @@ echo "Sizes of all files:"
 
 # sources are h5 files
 
-ls -lh $data_sub/*.src
+for h5_file in $data_sub/*.src; do
+    num_examples=$(python $scripts/preprocessing/get_size_of_h5_dataset.py $h5_file)
+    echo "$h5_file   $num_examples"
+done
 
 wc -l $data_sub/*.txt
 wc -l $data_sub/*.trg

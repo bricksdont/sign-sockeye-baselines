@@ -72,7 +72,7 @@ for test_corpus in $testing_corpora; do
     if [[ -s $output ]]; then
       echo "Translations exist: $output"
 
-      num_lines_input=$(python $scripts/translation/get_size_of_h5_dataset.py $input)
+      num_lines_input=$(python $scripts/preprocessing/get_size_of_h5_dataset.py $input)
       num_lines_output=$(cat $output | wc -l)
 
       if [[ $num_lines_input == $num_lines_output ]]; then
