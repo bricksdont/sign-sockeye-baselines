@@ -228,7 +228,7 @@ def convert_fps_30_to_25(poses: Pose) -> Pose:
     return Pose(header=poses.header, body=new_posebody)
 
 
-def convert_pose_framerate(poses: Pose, video_fps: int, target_fps: int) -> Pose:
+def convert_pose_framerate(poses: Pose, video_fps: int, target_fps: Optional[int]) -> Pose:
     """
 
     :param poses:
@@ -236,8 +236,9 @@ def convert_pose_framerate(poses: Pose, video_fps: int, target_fps: int) -> Pose
     :param target_fps:
     :return:
     """
+
     # base case
-    if video_fps == target_fps:
+    if video_fps == target_fps or target_fps is None:
         return poses
     elif video_fps == (2 * target_fps):
         return poses.slice_step(2)
