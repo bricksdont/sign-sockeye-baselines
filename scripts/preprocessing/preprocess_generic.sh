@@ -145,6 +145,12 @@ done
 
 # prepare our unseen test data (reusing our existing script, then delete some empty files that result from this)
 
+if [[ $dry_run == "true" ]]; then
+    train_size_arg="--train-size $DRY_RUN_DEVTEST_SIZE"
+else
+    train_size_arg=""
+fi
+
 # --output-prefix naming logic: [prefix].[for h5: openpose or mediapipe].{dev,test,train}.{txt,h5}.
 
 python $scripts/preprocessing/convert_and_split_data.py \
