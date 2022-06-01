@@ -17,4 +17,6 @@ pose_type="openpose"
 training_corpora="srf"
 testing_corpora="test unseen"
 
+force_target_fps="false"
+
 . $scripts/running/run_generic.sh

@@ -21,6 +21,8 @@ pose_type="openpose"
 training_corpora="focusnews"
 testing_corpora="test unseen"
 
+force_target_fps="false"
+
 # delete files for this model to rerun everything
 
 sub_folders="data shared_models prepared models translations evaluations"
