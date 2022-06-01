@@ -40,7 +40,7 @@ for training_corpus in $training_corpora; do
         original_data_sub=$original_data/$training_corpus
     fi
 
-    for sub_folder in subtitles openpose mediapipe; do
+    for sub_folder in subtitles openpose mediapipe videos; do
         original_data_sub_sub=$original_data_sub/$sub_folder
         download_sub_sub=$download_sub/$sub_folder
 
