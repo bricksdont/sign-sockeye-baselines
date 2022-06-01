@@ -166,7 +166,7 @@ python $scripts/preprocessing/convert_and_split_data.py \
 rm $data_sub/unseen.*{dev,test}.{h5,txt}
 
 mv $data_sub/unseen.$pose_type.train.h5 $data_sub/unseen.src
-mv $data_sub/unseen.$pose_type.train.txt $data_sub/unseen.trg
+mv $data_sub/unseen.train.txt $data_sub/unseen.trg
 
 # prenormalization for all subsets (targets only from here on)
 
