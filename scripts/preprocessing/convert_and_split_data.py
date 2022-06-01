@@ -297,12 +297,18 @@ def extract_parallel_examples(subtitles: List[srt.Subtitle],
     :param pose_type:
     :return:
     """
+    logging.debug("Pose shape before pose manipulation:")
+    logging.debug(poses.body.data.shape)
+
     poses = convert_pose_framerate(poses=poses, video_fps=video_fps, target_fps=target_fps)
 
     if normalize_poses:
         poses = get_normalized_poses(poses=poses, pose_type=pose_type)
 
     pose_num_frames = poses.body.data.shape[0]
+
+    logging.debug("Pose shape after pose manipulation:")
+    logging.debug(poses.body.data.shape)
 
     assert pose_num_frames > 0, "Pose object for entire video has zero frames."
 
@@ -326,6 +332,11 @@ def extract_parallel_examples(subtitles: List[srt.Subtitle],
             end_frame = pose_num_frames
 
         pose_slice = poses.body.data[start_frame:end_frame]
+
+        logging.debug("start_frame: %s" % str(start_frame))
+        logging.debug("end_frame: %s" % str(end_frame))
+        logging.debug("pose_slice shape: %s" % str(pose_slice.shape))
+
         pose_slice = reduce_pose_slice(pose_slice)
 
         subtitle_content = get_subtitle_content(subtitle)
