@@ -11,6 +11,7 @@
 # $fps
 # $pose_type
 # $sentencepiece_vocab_size
+# $force_target_fps
 
 
 base=$1
@@ -23,6 +24,7 @@ training_corpora=$7
 fps=$8
 pose_type=$9
 sentencepiece_vocab_size=${10}
+force_target_fps=${11}
 
 download=$base/download
 data=$base/data
@@ -94,6 +96,12 @@ else
     dry_run_arg=""
 fi
 
+if [[ $force_target_fps == "true" ]]; then
+    target_fps_arg="--target-fps 25"
+else
+    target_fps_arg=""
+fi
+
 for training_corpus in $training_corpora; do
 
     download_sub=$download/$training_corpus
@@ -108,7 +116,7 @@ for training_corpus in $training_corpora; do
         --output-prefix $training_corpus \
         --seed $seed \
         --devtest-size $devtest_size \
-        --pose-type $pose_type $train_size_arg $dry_run_arg
+        --pose-type $pose_type $train_size_arg $dry_run_arg $target_fps_arg
 
 done
 
