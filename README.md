@@ -45,3 +45,10 @@ Train a baseline system for DSGS -> DE using focusnews data:
 A baseline using SRF data:
 
     scripts/running/run_baseline_srf.sh
+
+## Ideas for improving this baseline
+
+- openpose do not take the first person's keypoints, be more elaborate
+- different / better normalization or scaling of poses
+- augmentation, frame dropout from pose_format
+- graph encoder for poses

@@ -1,6 +1,7 @@
 #! /usr/bin/python3
 
 import os
+import re
 import datetime
 import srt
 import cv2
@@ -197,6 +198,23 @@ def reduce_pose_slice(pose_slice: np.array) -> np.array:
     return pose_slice.reshape(pose_slice.shape[0], -1)
 
 
+def get_subtitle_content(subtitle: srt.Subtitle) -> str:
+    """
+
+    :param subtitle:
+    :return:
+    """
+    content = subtitle.content
+
+    # TODO: this should not be necessary anymore once an upstream problem with ilex2srt.py is fixed
+
+    content = content.replace("\n", " ")
+    content = re.sub(r' +', ' ', content)
+    content = content.strip()
+
+    return content
+
+
 def extract_parallel_examples(subtitles: List[srt.Subtitle],
                               poses: Pose,
                               fps: int) -> Iterator[Tuple[str, np.array]]:
@@ -232,7 +250,9 @@ def extract_parallel_examples(subtitles: List[srt.Subtitle],
         pose_slice = poses.body.data[start_frame:end_frame]
         pose_slice = reduce_pose_slice(pose_slice)
 
-        yield subtitle.content, pose_slice
+        subtitle_content = get_subtitle_content(subtitle)
+
+        yield subtitle_content, pose_slice
 
 
 class ParallelWriter:
@@ -445,6 +465,7 @@ def main():
         if "openpose" in filename:
             poses = read_openpose_surrey_format(filepath=filepath, fps=fps)
         elif "mediapipe" in filename:
+            # TODO: add function to extract and convert mediapipe
             raise NotImplementedError
         else:
             raise ValueError("Cannot make sense of pose file: '%s'." % filename)
