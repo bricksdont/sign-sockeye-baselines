@@ -10,7 +10,7 @@ trg="de"
 
 # baseline
 
-model_name="baseline"
+model_name="baseline_focusnews"
 
 pose_type="openpose"
 
