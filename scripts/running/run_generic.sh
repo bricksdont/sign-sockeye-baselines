@@ -11,10 +11,10 @@
 # $training_corpora
 # $testing_corpora
 # $seed
-# $fps
 # $pose_type
 # $sentencepiece_vocab_size
 # $force_target_fps
+# $normalize_poses
 
 module load volta nvidia/cuda10.2-cudnn7.6.5 anaconda3
 
@@ -45,10 +45,6 @@ if [ -z "$testing_corpora" ]; then
     testing_corpora="test"
 fi
 
-if [ -z "$fps" ]; then
-    fps="25"
-fi
-
 if [ -z "$pose_type" ]; then
     pose_type="openpose"
 fi
@@ -63,6 +59,10 @@ fi
 
 if [ -z "$force_target_fps" ]; then
     force_target_fps="false"
+fi
+
+if [ -z "$normalize_poses" ]; then
+    normalize_poses="false"
 fi
 
 # SLURM job args
@@ -94,6 +94,7 @@ echo "SEED: $seed" | tee -a $logs_sub_sub/MAIN
 echo "POSE_TYPE: $pose_type" | tee -a $logs_sub_sub/MAIN
 echo "SENTENCEPIECE_VOCAB_SIZE: $sentencepiece_vocab_size" | tee -a $logs_sub_sub/MAIN
 echo "FORCE_TARGET_FPS: $force_target_fps" | tee -a $logs_sub_sub/MAIN
+echo "NORMALIZE_POSES: $normalize_poses" | tee -a $logs_sub_sub/MAIN
 echo "DRY RUN: $dry_run" | tee -a $logs_sub_sub/MAIN
 
 # download corpora
@@ -117,7 +118,7 @@ id_preprocess=$(
     $SLURM_LOG_ARGS \
     $scripts/preprocessing/preprocess_generic.sh \
     $base $src $trg $model_name $dry_run $seed "$training_corpora" \
-    $fps $pose_type $sentencepiece_vocab_size $force_target_fps
+    $pose_type $sentencepiece_vocab_size $force_target_fps $normalize_poses
 )
 
 echo "  id_preprocess: $id_preprocess | $logs_sub_sub/slurm-$id_preprocess.out" | tee -a $logs_sub_sub/MAIN

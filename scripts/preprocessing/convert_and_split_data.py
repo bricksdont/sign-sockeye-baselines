@@ -248,10 +248,41 @@ def convert_pose_framerate(poses: Pose, video_fps: int, target_fps: Optional[int
         raise ValueError("Cannot convert between video_fps: %d and target_fps: %d." % (video_fps, target_fps))
 
 
+def get_normalized_poses_openpose(poses: Pose) -> Pose:
+    """
+
+    :param poses:
+    :return:
+    """
+    normalization_info = poses.header.normalization_info(
+        p1=("pose_keypoints_2d", "RShoulder"),
+        p2=("pose_keypoints_2d", "LShoulder")
+    )
+
+    return poses.normalize(normalization_info)
+
+
+def get_normalized_poses(poses: Pose, pose_type: str) -> Pose:
+    """
+
+    :param poses:
+    :param pose_type:
+    :return:
+    """
+    if pose_type == "openpose":
+        return get_normalized_poses_openpose(poses)
+    elif pose_type == "mediapipe":
+        raise NotImplementedError
+    else:
+        raise ValueError("Don't know how to normalize pose_type: %s" % pose_type)
+
+
 def extract_parallel_examples(subtitles: List[srt.Subtitle],
                               poses: Pose,
                               video_fps: int,
-                              target_fps: Optional[int]) -> Iterator[Tuple[str, np.array]]:
+                              target_fps: Optional[int],
+                              normalize_poses: bool,
+                              pose_type: str) -> Iterator[Tuple[str, np.array]]:
     """
 
     :param subtitles: Example:
@@ -262,9 +293,14 @@ def extract_parallel_examples(subtitles: List[srt.Subtitle],
     :param poses: Array dimensions: (frames, person, points, dimensions)
     :param video_fps:
     :param target_fps:
+    :param normalize_poses:
+    :param pose_type:
     :return:
     """
     poses = convert_pose_framerate(poses=poses, video_fps=video_fps, target_fps=target_fps)
+
+    if normalize_poses:
+        poses = get_normalized_poses(poses=poses, pose_type=pose_type)
 
     pose_num_frames = poses.body.data.shape[0]
 
@@ -428,6 +464,8 @@ def parse_args():
     parser.add_argument("--dry-run", action="store_true",
                         help="Whether this is a dry run only.", required=False)
 
+    parser.add_argument("--normalize-poses", action="store_true",
+                        help="Whether to normalize poses by shoulder width.", required=False)
     parser.add_argument("--pose-type", type=str,
                         help="Type of poses (openpose or mediapipe).", required=True, choices=["openpose", "mediapipe"])
     parser.add_argument("--target-fps", type=int, default=None,
@@ -527,7 +565,9 @@ def main():
         for text, pose_slice in extract_parallel_examples(poses=poses,
                                                           subtitles=matching_subtitles,
                                                           video_fps=video_fps,
-                                                          target_fps=args.target_fps):
+                                                          target_fps=args.target_fps,
+                                                          normalize_poses=args.normalize_poses,
+                                                          pose_type=args.pose_type):
 
             if example_id not in writers_by_id.keys():
                 # if dry run, we can end the loops now

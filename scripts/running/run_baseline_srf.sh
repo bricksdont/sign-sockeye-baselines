@@ -18,5 +18,6 @@ training_corpora="srf"
 testing_corpora="test unseen"
 
 force_target_fps="false"
+normalize_poses="false"
 
 . $scripts/running/run_generic.sh

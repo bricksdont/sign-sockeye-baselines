@@ -8,10 +8,10 @@
 # $dry_run
 # $seed
 # $training_corpora
-# $fps
 # $pose_type
 # $sentencepiece_vocab_size
 # $force_target_fps
+# $normalize_poses
 
 
 base=$1
@@ -21,10 +21,10 @@ model_name=$4
 dry_run=$5
 seed=$6
 training_corpora=$7
-fps=$8
-pose_type=$9
-sentencepiece_vocab_size=${10}
-force_target_fps=${11}
+pose_type=$8
+sentencepiece_vocab_size=9
+force_target_fps=${10}
+normalize_poses=${11}
 
 download=$base/download
 data=$base/data
@@ -102,6 +102,12 @@ else
     target_fps_arg=""
 fi
 
+if [[ $normalize_poses == "true" ]]; then
+    normalize_poses_arg="--normalize-poses"
+else
+    normalize_poses_arg=""
+fi
+
 for training_corpus in $training_corpora; do
 
     download_sub=$download/$training_corpus
@@ -116,7 +122,7 @@ for training_corpus in $training_corpora; do
         --output-prefix $training_corpus \
         --seed $seed \
         --devtest-size $devtest_size \
-        --pose-type $pose_type $train_size_arg $dry_run_arg $target_fps_arg
+        --pose-type $pose_type $train_size_arg $dry_run_arg $target_fps_arg $normalize_poses_arg
 
 done
 
@@ -159,7 +165,7 @@ python $scripts/preprocessing/convert_and_split_data.py \
         --output-prefix unseen \
         --seed $seed \
         --devtest-size 0 \
-        --pose-type $pose_type $train_size_arg $dry_run_arg $target_fps_arg
+        --pose-type $pose_type $train_size_arg $dry_run_arg $target_fps_arg $normalize_poses_arg
 
 # delete unused files and move to correct file extensions
 
