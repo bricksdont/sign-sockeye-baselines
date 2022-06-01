@@ -22,7 +22,7 @@ dry_run=$5
 seed=$6
 training_corpora=$7
 pose_type=$8
-sentencepiece_vocab_size=9
+sentencepiece_vocab_size=$9
 force_target_fps=${10}
 normalize_poses=${11}
 
