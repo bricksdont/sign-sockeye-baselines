@@ -382,6 +382,11 @@ def decide_on_split(num_examples: int,
 
     writers_by_id = {index: writers["train"] for index in train_indexes}
 
+    # return immediately if no samples should go to dev or test
+
+    if devtest_size == 0:
+        return writers_by_id
+
     # sample indexes for dev
 
     dev_indexes = np.random.choice(train_indexes, size=(devtest_size,), replace=False)

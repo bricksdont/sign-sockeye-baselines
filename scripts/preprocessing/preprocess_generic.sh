@@ -143,6 +143,16 @@ for subset in $ALL_SUBSETS; do
 
 done
 
+# prepare our unseen test data (reusing our existing script, then delete some empty files that result from this)
+
+python $scripts/preprocessing/convert_and_split_data.py \
+        --download-sub $download/test \
+        --output-dir $data_sub \
+        --output-prefix unseen \
+        --seed $seed \
+        --devtest-size 0 \
+        --pose-type $pose_type $dry_run_arg $target_fps_arg
+
 # prenormalization for all subsets (targets only from here on)
 
 for subset in $ALL_SUBSETS; do
