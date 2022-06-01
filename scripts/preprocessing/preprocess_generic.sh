@@ -108,7 +108,7 @@ for training_corpus in $training_corpora; do
 
     # convert downloaded data to text and h5 format, and create train/dev/test split
 
-    # --output-prefix naming logic: [prefix].{dev,test,train}.[for h5: openpose or mediapipe].{txt,h5}.
+    # --output-prefix naming logic: [prefix].[for h5: openpose or mediapipe].{dev,test,train}.{txt,h5}.
 
     python $scripts/preprocessing/convert_and_split_data.py \
         --download-sub $download_sub \
@@ -145,6 +145,8 @@ done
 
 # prepare our unseen test data (reusing our existing script, then delete some empty files that result from this)
 
+# --output-prefix naming logic: [prefix].[for h5: openpose or mediapipe].{dev,test,train}.{txt,h5}.
+
 python $scripts/preprocessing/convert_and_split_data.py \
         --download-sub $download/test \
         --output-dir $data_sub \
@@ -152,6 +154,13 @@ python $scripts/preprocessing/convert_and_split_data.py \
         --seed $seed \
         --devtest-size 0 \
         --pose-type $pose_type $dry_run_arg $target_fps_arg
+
+# delete unused files and move to correct file extensions
+
+rm $data_sub/unseen.*{dev,test}.{h5,txt}
+
+mv $data_sub/unseen.$pose_type.train.h5 $data_sub/unseen.src
+mv $data_sub/unseen.$pose_type.train.txt $data_sub/unseen.trg
 
 # prenormalization for all subsets (targets only from here on)
 

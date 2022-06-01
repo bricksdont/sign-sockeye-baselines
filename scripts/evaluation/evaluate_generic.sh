@@ -58,4 +58,4 @@ for corpus in $testing_corpora; do
 
     . $scripts/evaluation/evaluate_chrf_more_generic.sh
 
-    done
+done
