@@ -15,6 +15,6 @@ model_name="baseline"
 pose_type="openpose"
 
 training_corpora="focusnews"
-testing_corpora="test"
+testing_corpora="test unseen"
 
 . $scripts/running/run_generic.sh

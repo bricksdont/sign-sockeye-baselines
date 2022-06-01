@@ -19,7 +19,7 @@ model_name="dry_run_srf"
 pose_type="openpose"
 
 training_corpora="srf"
-testing_corpora="test"
+testing_corpora="test unseen"
 
 # delete files for this model to rerun everything
 

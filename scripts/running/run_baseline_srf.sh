@@ -15,6 +15,6 @@ model_name="baseline_srf"
 pose_type="openpose"
 
 training_corpora="srf"
-testing_corpora="test"
+testing_corpora="test unseen"
 
 . $scripts/running/run_generic.sh
