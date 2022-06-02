@@ -325,7 +325,6 @@ def extract_parallel_examples(subtitles: List[srt.Subtitle],
         subtitle_fps = target_fps
 
     for subtitle in subtitles:
-        logging.debug("subtitle: %s" % str(subtitle))
 
         start_frame = convert_srt_time_to_frame(subtitle.start, fps=subtitle_fps)
         end_frame = convert_srt_time_to_frame(subtitle.end, fps=subtitle_fps)
