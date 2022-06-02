@@ -68,10 +68,11 @@ def get_file_id(filename: str) -> str:
     return parts[1]
 
 
-def subtitle_is_usable(subtitle: srt.Subtitle) -> bool:
+def subtitle_is_usable(subtitle: srt.Subtitle, fps: int) -> bool:
     """
 
     :param subtitle:
+    :param fps:
     :return:
     """
     if subtitle.content.strip() == "":
@@ -80,7 +81,10 @@ def subtitle_is_usable(subtitle: srt.Subtitle) -> bool:
 
     # TODO: once our sentence segmentation is improved this should not happen anymore perhaps and can be a strict check
 
-    if not subtitle.start < subtitle.end:
+    start_frame = convert_srt_time_to_frame(subtitle.start, fps=fps)
+    end_frame = convert_srt_time_to_frame(subtitle.end, fps=fps)
+
+    if not start_frame < end_frame:
         logging.debug("Skipping subtitle where start frame is equal or higher than end frame: %s" % str(subtitle))
         return False
 
@@ -121,10 +125,14 @@ def read_video_framerates(video_dir: str) -> Dict[str, int]:
     return framerate_by_id
 
 
-def read_subtitles(subtitle_dir: str) -> Tuple[Dict[str, List[srt.Subtitle]], int]:
+def read_subtitles(subtitle_dir: str,
+                   framerate_by_id: Dict[str, int],
+                   target_fps: Optional[int],) -> Tuple[Dict[str, List[srt.Subtitle]], int]:
     """
 
     :param subtitle_dir:
+    :param framerate_by_id:
+    :param target_fps:
     :return:
     """
 
@@ -137,13 +145,18 @@ def read_subtitles(subtitle_dir: str) -> Tuple[Dict[str, List[srt.Subtitle]], in
 
         file_id = get_file_id(filename)
 
+        if target_fps is not None:
+            fps = target_fps
+        else:
+            fps = framerate_by_id[file_id]
+
         subtitles = []  # type: List[srt.Subtitle]
 
         with open(filepath, "r") as handle:
             for subtitle in srt.parse(handle.read()):
 
                 # skip if there is no text content or times do not make sense
-                if not subtitle_is_usable(subtitle=subtitle):
+                if not subtitle_is_usable(subtitle=subtitle, fps=fps):
                     num_subtitles_skipped += 1
                     continue
 
@@ -528,7 +541,9 @@ def main():
     # load all subtitles (since they don't use a lot of memory)
 
     subtitle_dir = os.path.join(args.download_sub, "subtitles")
-    subtitles_by_id, num_subtitles_skipped = read_subtitles(subtitle_dir)
+    subtitles_by_id, num_subtitles_skipped = read_subtitles(subtitle_dir=subtitle_dir,
+                                                            framerate_by_id=framerate_by_id,
+                                                            target_fps=args.target_fps)
 
     num_examples = sum([len(subtitles) for subtitles in subtitles_by_id.values()])
 

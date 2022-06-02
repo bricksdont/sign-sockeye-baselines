@@ -55,3 +55,4 @@ A baseline using SRF data:
 - different / better normalization or scaling of poses
 - augmentation, frame dropout from pose_format
 - graph encoder for poses
+- add mediapipe processing
