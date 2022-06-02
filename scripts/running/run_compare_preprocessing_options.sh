@@ -14,7 +14,7 @@ pose_type="openpose"
 
 testing_corpora="test unseen"
 
-for training_corpus in srf focusnews;
+for training_corpus in srf focusnews; do
     for force_target_fps in false true; do
         for normalize_poses in false true; do
 
