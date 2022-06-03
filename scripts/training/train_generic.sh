@@ -9,6 +9,7 @@
 # $dry_run
 # $seed
 # $pose_type
+# $bucket_scaling
 
 base=$1
 src=$2
@@ -17,6 +18,7 @@ model_name=$4
 dry_run=$5
 seed=$6
 pose_type=$7
+bucket_scaling=$8
 
 venvs=$base/venvs
 
@@ -43,6 +45,7 @@ set -u
 
 # parameters are the same for all Transformer models
 
+fc_embed_dropout_pre="0.0"
 num_embed="512:512"
 num_layers="6:6"
 transformer_model_size="512"
@@ -60,38 +63,38 @@ LARGEST_TRAINSIZE=10000000
 num_lines=$(cat $data_sub_sub/train.pieces.trg | wc -l)
 
 if [[ $num_lines -gt ${LARGEST_TRAINSIZE} ]]; then
-    embed_dropout=0.1
+    fc_embed_dropout_post=0.1
     transformer_dropout=0.1
     batch_size=4096
     decode_and_evaluate=2500
     checkpoint_interval=5000
 elif [[ $num_lines -gt ${LARGE_TRAINSIZE} ]]; then
-    embed_dropout=0.1
+    fc_embed_dropout_post=0.1
     transformer_dropout=0.1
     batch_size=4096
     decode_and_evaluate=2500
     checkpoint_interval=5000
 elif [[ $num_lines -gt ${MEDIUM_TRAINSIZE} ]]; then
-    embed_dropout=0.1
+    fc_embed_dropout_post=0.1
     transformer_dropout=0.1
     batch_size=4096
     decode_and_evaluate=2500
     checkpoint_interval=5000
 elif [[ $num_lines -gt ${SMALL_TRAINSIZE} ]]; then
-    embed_dropout=0.2
+    fc_embed_dropout_post=0.2
     transformer_dropout=0.2
     batch_size=2048
     decode_and_evaluate=1000
     checkpoint_interval=1000
 elif [[ $num_lines -gt ${SMALLEST_TRAINSIZE} ]]; then
-    embed_dropout=0.5
+    fc_embed_dropout_post=0.5
     transformer_dropout=0.5
     batch_size=1024
     decode_and_evaluate=500
     checkpoint_interval=1000
 else
     echo "Warning: training data size appears too small to train a model"
-    embed_dropout=0.5
+    fc_embed_dropout_post=0.5
     transformer_dropout=0.5
     batch_size=1024
     decode_and_evaluate=500
@@ -130,6 +133,12 @@ else
     num_features="TODO"
 fi
 
+if [[ $bucket_scaling == "true" ]]; then
+    bucket_scaling_arg="--bucket-scaling"
+else
+    bucket_scaling_arg=""
+fi
+
 ##################################################
 
 python -m sockeye.train \
@@ -155,9 +164,9 @@ python -m sockeye.train \
 --transformer-dropout-act $transformer_dropout \
 --transformer-dropout-prepost $transformer_dropout \
 --transformer-positional-embedding-type fixed \
---embed-dropout $embed_dropout:$embed_dropout \
---fc-embed-dropout-pre $embed_dropout \
---fc-embed-dropout-post $embed_dropout \
+--embed-dropout 0.0:0.0 \
+--fc-embed-dropout-pre $fc_embed_dropout_pre \
+--fc-embed-dropout-post $fc_embed_dropout_post \
 --weight-tying-type trg_softmax \
 --num-embed $num_embed \
 --num-words 64000:64000 \
@@ -172,4 +181,4 @@ python -m sockeye.train \
 --max-num-checkpoint-not-improved 10 \
 --min-num-epochs 0 \
 --gradient-clipping-type abs \
---gradient-clipping-threshold 1 $dry_run_additional_args
+--gradient-clipping-threshold 1 $bucket_scaling_arg $dry_run_additional_args
