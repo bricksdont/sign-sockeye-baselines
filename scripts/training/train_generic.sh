@@ -130,7 +130,7 @@ if [[ $pose_type == "openpose" ]]; then
     num_features=270
 else
     # mediapipe poses
-    num_features="TODO"
+    num_features=609
 fi
 
 if [[ $bucket_scaling == "true" ]]; then

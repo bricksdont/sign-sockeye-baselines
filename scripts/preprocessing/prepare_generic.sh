@@ -49,7 +49,7 @@ if [[ $pose_type == "openpose" ]]; then
     num_features=270
 else
     # mediapipe poses
-    num_features="TODO"
+    num_features=609
 fi
 
 cmd="python -m sockeye.prepare_data -s $data_sub_sub/train.src -t $data_sub_sub/train.pieces.trg -o $prepared_sub_sub --max-seq-len 500:250 --seed $seed --source-is-continuous --source-continuous-num-features $num_features"
