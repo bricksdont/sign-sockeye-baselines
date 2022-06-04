@@ -431,7 +431,7 @@ def extract_parallel_examples(subtitles: List[srt.Subtitle],
                           (end_frame, pose_num_frames, str(subtitle)))
             end_frame = pose_num_frames
 
-        pose_slice = poses.body.data[start_frame:end_frame].zero_filled()
+        pose_slice = poses.body.data[start_frame:end_frame]
 
         pose_slice = reduce_pose_slice(pose_slice)
 
