@@ -112,9 +112,7 @@ def load_mediapipe_directory(directory: str, fps: float = 24) -> Pose:
 
     pose = formatted_holistic_pose()
 
-    print("pose points mediapipe: ", pose.body.data.shape[2])
     pose.body = load_mediapipe_frames()
-    print("pose points mediapipe after: ", pose.body.data.shape[2])
 
     return pose
 
