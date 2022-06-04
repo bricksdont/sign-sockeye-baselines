@@ -46,7 +46,7 @@ fi
 mkdir -p $prepared_sub_sub
 
 if [[ $pose_type == "openpose" ]]; then
-    num_features=274
+    num_features=270
 else
     # mediapipe poses
     num_features="TODO"

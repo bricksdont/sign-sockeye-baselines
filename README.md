@@ -1,5 +1,10 @@
 # sign-sockeye-baselines
 
+## Making changes to this repository
+
+The best way of collaborating on this code is to create new branches and then create pull request based on changes in
+a branch.
+
 ## Type of machine required
 
 A recent version of Ubuntu with conda installed. The code also

@@ -11,6 +11,7 @@ import argparse
 import logging
 
 import numpy as np
+import mediapipe as mp
 
 from tqdm import tqdm
 from collections import Counter
@@ -18,9 +19,17 @@ from typing import List, Dict, Iterator, Tuple, Optional
 
 # noinspection PyUnresolvedReferences
 from sockeye import h5_io
-from pose_format import Pose
+from pose_format import Pose, PoseHeader
 from pose_format.numpy import NumPyPoseBody
-from pose_format.utils.openpose import load_openpose_directory
+from pose_format.pose_header import PoseHeaderDimensions
+from pose_format.utils.openpose_135 import load_openpose_135_directory
+from pose_format.utils.holistic import holistic_components
+from pose_format.utils.openpose import load_frames_directory_dict
+
+
+mp_holistic = mp.solutions.holistic
+FACEMESH_CONTOURS_POINTS = [str(p) for p in
+                            sorted(set([p for p_tup in list(mp_holistic.FACEMESH_CONTOURS) for p in p_tup]))]
 
 
 def extract_tar_xz_file(filepath: str, target_dir: str):
@@ -36,7 +45,8 @@ def extract_tar_xz_file(filepath: str, target_dir: str):
 
 def read_openpose_surrey_format(filepath: str, fps: int) -> Pose:
     """
-    Read files of the form "focusnews.071.openpose.tar.xz"
+    Read files of the form "focusnews.071.openpose.tar.xz".
+    Assumes a 135 keypoint Openpose model.
 
     :param filepath:
     :param fps:
@@ -49,9 +59,77 @@ def read_openpose_surrey_format(filepath: str, fps: int) -> Pose:
         openpose_dir = os.path.join(tmpdir_name, "openpose")
 
         # load directory
-        poses = load_openpose_directory(directory=openpose_dir, fps=fps)
+        poses = load_openpose_135_directory(directory=openpose_dir, fps=fps)
 
     return poses
+
+
+def formatted_holistic_pose():
+    dimensions = PoseHeaderDimensions(width=1000, height=1000, depth=1000)
+    header = PoseHeader(version=0.1, dimensions=dimensions, components=holistic_components("XYZC", 10))
+    body = NumPyPoseBody(fps=10,
+                         data=np.zeros(shape=(1, 1, header.total_points(), 3)),
+                         confidence=np.zeros(shape=(1, 1, header.total_points())))
+    pose = Pose(header, body)
+    return pose.get_components(["POSE_LANDMARKS", "FACE_LANDMARKS", "LEFT_HAND_LANDMARKS", "RIGHT_HAND_LANDMARKS"],
+                               {"FACE_LANDMARKS": FACEMESH_CONTOURS_POINTS})
+
+
+def load_mediapipe_directory(directory: str, fps: float = 24) -> Pose:
+    """
+
+    :param directory:
+    :param fps:
+    :return:
+    """
+
+    frames = load_frames_directory_dict(directory=directory, pattern="(?:^|\D)?(\d+).*?.json")
+
+    def load_mediapipe_frame(frame):
+        def load_landmarks(name, num_points: int):
+            points = [[float(p) for p in r.split(",")] for r in frame[name]["landmarks"]]
+            points = [(ps + [1.0])[:4] for ps in points]  # Add visibility to all points
+            if len(points) == 0:
+                points = [[0, 0, 0, 0] for _ in range(num_points)]
+            return np.array([[x, y, z] for x, y, z, c in points]), np.array([c for x, y, z, c in points])
+        face_data, face_confidence = load_landmarks("face_landmarks", 128)
+        body_data, body_confidence = load_landmarks("pose_landmarks", 33)
+        lh_data, lh_confidence = load_landmarks("left_hand_landmarks", 21)
+        rh_data, rh_confidence = load_landmarks("right_hand_landmarks", 21)
+        data = np.concatenate([body_data, face_data, lh_data, rh_data])
+        conf = np.concatenate([body_confidence, face_confidence, lh_confidence, rh_confidence])
+        return data, conf
+
+    def load_mediapipe_frames():
+        max_frames = int(max(frames.keys())) + 1
+        pose_body_data = np.zeros(shape=(max_frames, 1, 21 + 21 + 33 + 128, 3), dtype=np.float)
+        pose_body_conf = np.zeros(shape=(max_frames, 1, 21 + 21 + 33 + 128), dtype=np.float)
+        for frame_id, frame in frames.items():
+            data, conf = load_mediapipe_frame(frame)
+            pose_body_data[frame_id][0] = data
+            pose_body_conf[frame_id][0] = conf
+        return NumPyPoseBody(data=pose_body_data, confidence=pose_body_conf, fps=fps)
+
+    pose = formatted_holistic_pose()
+
+    print("pose points mediapipe: ", pose.body.data.shape[2])
+    pose.body = load_mediapipe_frames()
+    print("pose points mediapipe after: ", pose.body.data.shape[2])
+
+    return pose
+
+
+def read_mediapipe_surrey_format(filepath: str, fps: int) -> Pose:
+    """
+    Read files of the form "focusnews.103.mediapipe.tar.xz"
+    """
+    with tempfile.TemporaryDirectory(prefix="extract_pose_file") as tmpdir_name:
+        # extract tar.xz
+        extract_tar_xz_file(filepath=filepath, target_dir=tmpdir_name)
+        poses_dir = os.path.join(tmpdir_name, "poses")
+        # load directory
+        pose = load_mediapipe_directory(directory=poses_dir, fps=fps)
+    return pose
 
 
 def get_file_id(filename: str) -> str:
@@ -268,8 +346,22 @@ def get_normalized_poses_openpose(poses: Pose) -> Pose:
     :return:
     """
     normalization_info = poses.header.normalization_info(
-        p1=("pose_keypoints_2d", "RShoulder"),
-        p2=("pose_keypoints_2d", "LShoulder")
+        p1=("BODY_135", "RShoulder"),
+        p2=("BODY_135", "LShoulder")
+    )
+
+    return poses.normalize(normalization_info)
+
+
+def get_normalized_poses_mediapipe(poses: Pose) -> Pose:
+    """
+
+    :param poses:
+    :return:
+    """
+    normalization_info = poses.header.normalization_info(
+         p1=("POSE_LANDMARKS", "RIGHT_SHOULDER"),
+         p2=("POSE_LANDMARKS", "LEFT_SHOULDER")
     )
 
     return poses.normalize(normalization_info)
@@ -285,7 +377,7 @@ def get_normalized_poses(poses: Pose, pose_type: str) -> Pose:
     if pose_type == "openpose":
         return get_normalized_poses_openpose(poses)
     elif pose_type == "mediapipe":
-        raise NotImplementedError
+        return get_normalized_poses_mediapipe(poses)
     else:
         raise ValueError("Don't know how to normalize pose_type: %s" % pose_type)
 
@@ -339,7 +431,7 @@ def extract_parallel_examples(subtitles: List[srt.Subtitle],
                           (end_frame, pose_num_frames, str(subtitle)))
             end_frame = pose_num_frames
 
-        pose_slice = poses.body.data[start_frame:end_frame]
+        pose_slice = poses.body.data[start_frame:end_frame].fix_nan().zero_filled()
 
         pose_slice = reduce_pose_slice(pose_slice)
 
@@ -572,8 +664,7 @@ def main():
         if "openpose" in filename:
             poses = read_openpose_surrey_format(filepath=filepath, fps=video_fps)
         elif "mediapipe" in filename:
-            # TODO: add function to extract and convert mediapipe
-            raise NotImplementedError
+            poses = read_mediapipe_surrey_format(filepath=filepath, fps=video_fps)
         else:
             raise ValueError("Cannot make sense of pose file: '%s'." % filename)
 
