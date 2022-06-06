@@ -8,6 +8,7 @@
 # $model_name
 # $seed
 # $pose_type
+# $bucket_scaling
 
 base=$1
 src=$2
@@ -15,6 +16,7 @@ trg=$3
 model_name=$4
 seed=$5
 pose_type=$6
+bucket_scaling=$7
 
 # measure time
 
@@ -52,7 +54,13 @@ else
     num_features=609
 fi
 
-cmd="python -m sockeye.prepare_data -s $data_sub_sub/train.src -t $data_sub_sub/train.pieces.trg -o $prepared_sub_sub --max-seq-len 500:250 --seed $seed --source-is-continuous --source-continuous-num-features $num_features"
+if [[ $bucket_scaling == "true" ]]; then
+    bucket_scaling_arg="--bucket-scaling"
+else
+    bucket_scaling_arg=""
+fi
+
+cmd="python -m sockeye.prepare_data -s $data_sub_sub/train.src -t $data_sub_sub/train.pieces.trg -o $prepared_sub_sub --max-seq-len 500:250 --seed $seed --source-is-continuous --source-continuous-num-features $num_features $bucket_scaling_arg"
 
 echo "Executing:"
 echo "$cmd"
@@ -64,7 +72,7 @@ python -m sockeye.prepare_data \
                         --max-seq-len 500:250 \
                         --seed $seed \
                         --source-is-continuous \
-                        --source-continuous-num-features $num_features
+                        --source-continuous-num-features $num_features $bucket_scaling_arg
 
 echo "time taken:"
 echo "$SECONDS seconds"

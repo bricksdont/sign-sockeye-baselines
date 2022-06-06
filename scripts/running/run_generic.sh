@@ -137,7 +137,7 @@ id_prepare=$(
     --dependency=afterok:$id_preprocess \
     $SLURM_LOG_ARGS \
     $scripts/preprocessing/prepare_generic.sh \
-    $base $src $trg $model_name $seed $pose_type
+    $base $src $trg $model_name $seed $pose_type $bucket_scaling
 )
 
 echo "  id_prepare: $id_prepare | $logs_sub_sub/slurm-$id_prepare.out"  | tee -a $logs_sub_sub/MAIN
