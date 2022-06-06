@@ -63,30 +63,35 @@ LARGEST_TRAINSIZE=10000000
 num_lines=$(cat $data_sub_sub/train.pieces.trg | wc -l)
 
 if [[ $num_lines -gt ${LARGEST_TRAINSIZE} ]]; then
+    embed_dropout=0.1
     fc_embed_dropout_post=0.1
     transformer_dropout=0.1
     batch_size=4096
     decode_and_evaluate=2500
     checkpoint_interval=5000
 elif [[ $num_lines -gt ${LARGE_TRAINSIZE} ]]; then
+    embed_dropout=0.1
     fc_embed_dropout_post=0.1
     transformer_dropout=0.1
     batch_size=4096
     decode_and_evaluate=2500
     checkpoint_interval=5000
 elif [[ $num_lines -gt ${MEDIUM_TRAINSIZE} ]]; then
+    embed_dropout=0.1
     fc_embed_dropout_post=0.1
     transformer_dropout=0.1
     batch_size=4096
     decode_and_evaluate=2500
     checkpoint_interval=5000
 elif [[ $num_lines -gt ${SMALL_TRAINSIZE} ]]; then
+    embed_dropout=0.2
     fc_embed_dropout_post=0.2
     transformer_dropout=0.2
     batch_size=2048
     decode_and_evaluate=1000
     checkpoint_interval=1000
 elif [[ $num_lines -gt ${SMALLEST_TRAINSIZE} ]]; then
+    embed_dropout=0.5
     fc_embed_dropout_post=0.5
     transformer_dropout=0.5
     batch_size=1024
@@ -94,6 +99,7 @@ elif [[ $num_lines -gt ${SMALLEST_TRAINSIZE} ]]; then
     checkpoint_interval=1000
 else
     echo "Warning: training data size appears too small to train a model"
+    embed_dropout=0.5
     fc_embed_dropout_post=0.5
     transformer_dropout=0.5
     batch_size=1024
@@ -164,7 +170,7 @@ python -m sockeye.train \
 --transformer-dropout-act $transformer_dropout \
 --transformer-dropout-prepost $transformer_dropout \
 --transformer-positional-embedding-type fixed \
---embed-dropout 0.0:0.0 \
+--embed-dropout 0.0:$embed_dropout \
 --fc-embed-dropout-pre $fc_embed_dropout_pre \
 --fc-embed-dropout-post $fc_embed_dropout_post \
 --weight-tying-type trg_softmax \
