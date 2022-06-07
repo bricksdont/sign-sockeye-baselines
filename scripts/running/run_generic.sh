@@ -16,6 +16,7 @@
 # $force_target_fps
 # $normalize_poses
 # $bucket_scaling
+# $local_download_data
 
 module load volta nvidia/cuda10.2-cudnn7.6.5 anaconda3
 
@@ -36,6 +37,10 @@ mkdir -p $logs_sub_sub
 
 if [ -z "$dry_run" ]; then
     dry_run="false"
+fi
+
+if [ -z "$local_download_data" ]; then
+    local_download_data="/net/cephfs/shares/volk.cl.uzh/EASIER/WMT_Shared_Task/"
 fi
 
 if [ -z "$training_corpora" ]; then
@@ -69,6 +74,10 @@ fi
 if [ -z "$bucket_scaling" ]; then
     bucket_scaling="false"
 fi
+
+# after setting unset variables: fail if variables are still undefined
+
+set -u
 
 # SLURM job args
 
@@ -110,7 +119,7 @@ id_download=$(
     $SLURM_ARGS_GENERIC \
     $SLURM_LOG_ARGS \
     $scripts/download/download_generic.sh \
-    $base "$training_corpora"
+    $base "$training_corpora" $local_download_data
 )
 
 echo "  id_download: $id_download | $logs_sub_sub/slurm-$id_download.out" | tee -a $logs_sub_sub/MAIN

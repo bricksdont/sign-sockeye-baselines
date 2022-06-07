@@ -5,9 +5,11 @@ set -u
 # calling process needs to set:
 # $base
 # $training_corpora
+# $local_download_data
 
 base=$1
 training_corpora=$2
+local_download_data=$3
 
 scripts=$base/scripts
 download=$base/download
@@ -15,9 +17,10 @@ venvs=$base/venvs
 
 mkdir -p $download
 
-# TODO: change once our data is online
+# path to local download of training data
+# (could be replaced with a download once our data is available online)
 
-original_data=/net/cephfs/shares/volk.cl.uzh/EASIER/WMT_Shared_Task/
+original_data=$local_download_data
 
 # also link our unseen test data (local links, participants will not have access to this)
 

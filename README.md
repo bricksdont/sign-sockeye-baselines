@@ -21,6 +21,9 @@ Another important variable to change is `base`, which is defined
 in every top-level script (in `scripts/running`). `base` determines where
 files and folders should be written.
 
+Finally, set the variable `local_download_data` to indicate where you downloaded our training
+data. The path must be the folder which contains the two sub-folders `srf` and `focusnews`.
+
 ## Basic setup
 
 Create a venv:
