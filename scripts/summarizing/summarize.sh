@@ -10,7 +10,7 @@ summaries=$base/summaries
 
 mkdir -p $summaries
 
-python3 $scripts/summaries/summarize.py --eval-folder $evaluations > $summaries/summary.tsv
+python3 $scripts/summarizing/summarize.py --eval-folder $evaluations > $summaries/summary.tsv
 
 # upload to home.ifi.uzh.ch
 
