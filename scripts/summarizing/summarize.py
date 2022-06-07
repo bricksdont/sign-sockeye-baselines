@@ -336,7 +336,7 @@ def main():
                     "FORCE_TARGET_FPS",
                     "NORMALIZE_POSES",
                     "POSE_TYPE",
-                    "BUCKET_SCALIG",
+                    "BUCKET_SCALING",
                     "BLEU",
                     "CHRF"]
 

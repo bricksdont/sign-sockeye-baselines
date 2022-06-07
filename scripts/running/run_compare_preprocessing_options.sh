@@ -13,6 +13,8 @@ pose_type="openpose"
 bucket_scaling="true"
 normalize_poses="true"
 
+testing_corpora="test unseen"
+
 for pose_type in openpose mediapipe; do
     for training_corpus in srf focusnews; do
         for force_target_fps in false true; do
