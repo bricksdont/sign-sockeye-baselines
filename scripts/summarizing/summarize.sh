@@ -1,6 +1,6 @@
 #! /bin/bash
 
-base=/net/cephfs/shares/volk.cl.uzh/mathmu/easier-gloss-translation
+base=/net/cephfs/shares/volk.cl.uzh/mathmu/sign-sockeye-baselines
 
 venvs=$base/venvs
 scripts=$base/scripts
