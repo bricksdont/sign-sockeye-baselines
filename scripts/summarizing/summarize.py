@@ -127,7 +127,7 @@ def parse_model_name(model_name: str) -> Tuple[str, str, str, str, str]:
     """
     training_corpus, force_target_fps, normalize_poses, pose_type, bucket_scaling = "-", "-", "-", "-", "-"
 
-    if model_name == "dry_run":
+    if "dry_run" in model_name:
         return training_corpus, force_target_fps, normalize_poses, pose_type, bucket_scaling
 
     pairs = model_name.split("+")
