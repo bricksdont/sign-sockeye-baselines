@@ -4,7 +4,7 @@
 
 If you use any of our code, please cite this repository as follows:
 
-    @misc{mueller2022easier-gloss-translation-models,
+    @misc{mueller2022sign-sockeye-baselines,
         title={Sockeye baseline models for sign language translation},
         author={M\"{u}ller, Mathias and Rios, Annette and Moryossef, Amit},
         howpublished={\url{https://github.com/bricksdont/sign-sockeye-baselines}},
