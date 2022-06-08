@@ -22,7 +22,7 @@ mkdir -p $download
 
 original_data=$local_download_data
 
-# also link our unseen dev data to use as test (local links, participants will only have partial access to this at first)
+# also link our unseen dev and test data (local links, participants will only have partial access to this at first)
 
 all_corpora="$training_corpora dev test"
 

@@ -56,7 +56,7 @@ def parse_filename(filename: str) -> Tuple[str, str]:
 
     assert target_string == "trg", "Cannot parse filename: '%s'" % filename
 
-    assert corpus in ["test", "unseen"], "Cannot parse filename: '%s'" % filename
+    assert corpus in ["test", "dev_unseen", "test_unseen"], "Cannot parse filename: '%s'" % filename
 
     return corpus, metric
 
