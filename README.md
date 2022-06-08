@@ -20,7 +20,7 @@ a branch.
 
 A recent version of Ubuntu with conda installed. The code also
 assumes a GPU is available on the system (a single V100 in our
-baseline experiments).
+baseline experiments). CUDA and CuDNN must be installed.
 
 ## What to modify before running scripts
 
