@@ -33,7 +33,8 @@ in every top-level script (in `scripts/running`). `base` determines where
 files and folders should be written.
 
 Finally, set the variable `local_download_data` to indicate where you downloaded our training
-data. The path must be the folder which contains the two sub-folders `srf` and `focusnews`.
+data. The path must be the folder which contains the sub-folders `srf` and `focusnews`, and optionally also
+`dev` and `test`.
 
 ## Basic setup
 
@@ -73,5 +74,5 @@ A baseline using SRF data:
 - openpose do not take the first person's keypoints, be more elaborate
 - different / better normalization or scaling of poses
 - augmentation, frame dropout from pose_format
+- deal with framerate differences better or make use of them for augmentation
 - graph encoder for poses
-- add mediapipe processing
