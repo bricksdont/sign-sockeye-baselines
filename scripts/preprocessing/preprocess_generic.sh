@@ -121,7 +121,8 @@ for training_corpus in $training_corpora; do
         --output-dir $data_sub \
         --output-prefix $training_corpus \
         --seed $seed \
-        --devtest-size $devtest_size \
+        --dev-size $devtest_size \
+        --test-size $devtest_size \
         --pose-type $pose_type $train_size_arg $dry_run_arg $target_fps_arg $normalize_poses_arg
 
 done
@@ -149,7 +150,7 @@ for subset in $ALL_SUBSETS; do
 
 done
 
-# prepare our unseen test data (reusing our existing script, then delete some empty files that result from this)
+# prepare our unseen dev and  test data (reusing our existing script, then delete some empty files that result from this)
 
 if [[ $dry_run == "true" ]]; then
     train_size_arg="--train-size $DRY_RUN_DEVTEST_SIZE"
@@ -157,22 +158,27 @@ else
     train_size_arg=""
 fi
 
-# --output-prefix naming logic: [prefix].[for h5: openpose or mediapipe].{dev,test,train}.{txt,h5}.
+for unseen_corpus in dev test; do
 
-python $scripts/preprocessing/convert_and_split_data.py \
-        --download-sub $download/test \
-        --output-dir $data_sub \
-        --output-prefix unseen \
-        --seed $seed \
-        --devtest-size 0 \
-        --pose-type $pose_type $train_size_arg $dry_run_arg $target_fps_arg $normalize_poses_arg
+    # --output-prefix naming logic: [prefix].[for h5: openpose or mediapipe].{dev,test,train}.{txt,h5}.
 
-# delete unused files and move to correct file extensions
+    python $scripts/preprocessing/convert_and_split_data.py \
+            --download-sub $download/$unseen_corpus \
+            --output-dir $data_sub \
+            --output-prefix "${unseen_corpus}_unseen" \
+            --seed $seed \
+            --dev-size 0 \
+            --test-size 0 \
+            --pose-type $pose_type $train_size_arg $dry_run_arg $target_fps_arg $normalize_poses_arg
 
-rm $data_sub/unseen.*{dev,test}.{h5,txt}
+    # delete unused files and move to correct file extensions
 
-mv $data_sub/unseen.$pose_type.train.h5 $data_sub/unseen.src
-mv $data_sub/unseen.train.txt $data_sub/unseen.trg
+    rm $data_sub/"${unseen_corpus}_unseen".*{dev,test}.{h5,txt}
+
+    mv $data_sub/"${unseen_corpus}_unseen".$pose_type.train.h5 $data_sub/"${unseen_corpus}_unseen".src
+    mv $data_sub/"${unseen_corpus}_unseen".train.txt $data_sub/"${unseen_corpus}_unseen".trg
+
+done
 
 # prenormalization for all subsets (targets only from here on)
 

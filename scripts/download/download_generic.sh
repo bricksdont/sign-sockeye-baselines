@@ -22,9 +22,9 @@ mkdir -p $download
 
 original_data=$local_download_data
 
-# also link our unseen test data (local links, participants will not have access to this)
+# also link our unseen dev data to use as test (local links, participants will only have partial access to this at first)
 
-all_corpora="$training_corpora test"
+all_corpora="$training_corpora dev test"
 
 for corpus in $all_corpora; do
 
@@ -39,7 +39,7 @@ for corpus in $all_corpora; do
     mkdir -p $download_sub
 
     # stand-in for actual download from an online source: link to local files
-    # TODO: change once our data is online
+    # TODO: perhaps change once our data is online
 
     if [[ $corpus == "srf" ]]; then
         original_data_sub=$original_data/$corpus/parallel

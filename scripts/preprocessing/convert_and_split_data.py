@@ -494,14 +494,16 @@ class ParallelWriter:
 
 def decide_on_split(num_examples: int,
                     train_size: Optional[int],
-                    devtest_size: int,
+                    dev_size: int,
+                    test_size: int,
                     writers: Dict[str, ParallelWriter],
                     dry_run: bool) -> Dict[int, ParallelWriter]:
     """
 
     :param num_examples:
     :param train_size:
-    :param devtest_size:
+    :param dev_size:
+    :param test_size:
     :param writers:
     :param dry_run:
     :return:
@@ -512,7 +514,7 @@ def decide_on_split(num_examples: int,
     # sub-sample if train_size has a limit
 
     if train_size is not None:
-        total_size = train_size + (2 * devtest_size)
+        total_size = train_size + dev_size + test_size
 
         if dry_run:
             # for a dry run select the first N examples (non-random)
@@ -526,12 +528,12 @@ def decide_on_split(num_examples: int,
 
     # return immediately if no samples should go to dev or test
 
-    if devtest_size == 0:
+    if dev_size == test_size == 0:
         return writers_by_id
 
     # sample indexes for dev
 
-    dev_indexes = np.random.choice(train_indexes, size=(devtest_size,), replace=False)
+    dev_indexes = np.random.choice(train_indexes, size=(dev_size,), replace=False)
 
     for dev_index in dev_indexes:
         writers_by_id[dev_index] = writers["dev"]
@@ -540,7 +542,7 @@ def decide_on_split(num_examples: int,
 
     remaining_train_indexes = np.asarray([i for i in train_indexes if i not in dev_indexes])
 
-    test_indexes = np.random.choice(remaining_train_indexes, size=(devtest_size,), replace=False)
+    test_indexes = np.random.choice(remaining_train_indexes, size=(test_size,), replace=False)
 
     for test_index in test_indexes:
         writers_by_id[test_index] = writers["test"]
@@ -564,8 +566,10 @@ def parse_args():
                         help="Random seed for data splits.", required=True)
     parser.add_argument("--train-size", type=int, default=None,
                         help="Maximum number of examples in train set. Default: no limit.", required=False)
-    parser.add_argument("--devtest-size", type=int,
-                        help="Number of examples in dev and test set each.", required=True)
+    parser.add_argument("--dev-size", type=int,
+                        help="Number of examples in dev set.", required=True)
+    parser.add_argument("--test-size", type=int,
+                        help="Number of examples in test set.", required=True)
     parser.add_argument("--dry-run", action="store_true",
                         help="Whether this is a dry run only.", required=False)
 
@@ -599,13 +603,13 @@ def main():
                                 pose_type=args.pose_type,
                                 subset="dev",
                                 output_prefix=args.output_prefix,
-                                max_size=args.devtest_size)
+                                max_size=args.dev_size)
 
     writer_test = ParallelWriter(output_dir=args.output_dir,
                                  pose_type=args.pose_type,
                                  subset="test",
                                  output_prefix=args.output_prefix,
-                                 max_size=args.devtest_size)
+                                 max_size=args.test_size)
 
     writers = {"train": writer_train, "dev": writer_dev, "test": writer_test}
 
@@ -635,7 +639,8 @@ def main():
 
     writers_by_id = decide_on_split(num_examples=num_examples,
                                     train_size=args.train_size,
-                                    devtest_size=args.devtest_size,
+                                    dev_size=args.dev_size,
+                                    test_size=args.test_size,
                                     writers=writers,
                                     dry_run=args.dry_run)
 

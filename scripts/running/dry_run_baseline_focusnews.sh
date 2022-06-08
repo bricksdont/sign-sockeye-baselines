@@ -19,10 +19,12 @@ model_name="dry_run_focusnews"
 pose_type="openpose"
 
 training_corpora="focusnews"
-testing_corpora="test unseen"
+testing_corpora="test dev_unseen test_unseen"
 
 force_target_fps="false"
-normalize_poses="false"
+normalize_poses="true"
+
+bucket_scaling="true"
 
 # delete files for this model to rerun everything
 
