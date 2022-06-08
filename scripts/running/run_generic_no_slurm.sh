@@ -15,6 +15,9 @@
 # $pose_type
 # $sentencepiece_vocab_size
 # $force_target_fps
+# $normalize_poses
+# $bucket_scaling
+# $local_download_data
 
 scripts=$base/scripts
 logs=$base/logs
@@ -30,6 +33,10 @@ mkdir -p $logs_sub_sub
 
 if [ -z "$dry_run" ]; then
     dry_run="false"
+fi
+
+if [ -z "$local_download_data" ]; then
+    local_download_data="/net/cephfs/shares/volk.cl.uzh/EASIER/WMT_Shared_Task/"
 fi
 
 if [ -z "$training_corpora" ]; then
@@ -60,6 +67,18 @@ if [ -z "$force_target_fps" ]; then
     force_target_fps="false"
 fi
 
+if [ -z "$normalize_poses" ]; then
+    normalize_poses="false"
+fi
+
+if [ -z "$bucket_scaling" ]; then
+    bucket_scaling="false"
+fi
+
+# after setting unset variables: fail if variables are still undefined
+
+set -u
+
 # log key info
 
 echo "##############################################" | tee -a $logs_sub_sub/MAIN
@@ -67,12 +86,15 @@ date | tee -a $logs_sub_sub/MAIN
 echo "##############################################" | tee -a $logs_sub_sub/MAIN
 echo "LANGPAIR: ${src}-${trg}" | tee -a $logs_sub_sub/MAIN
 echo "MODEL NAME: $model_name" | tee -a $logs_sub_sub/MAIN
+echo "LOCAL_DOWNLOAD_DATA: $local_download_data" | tee -a $logs_sub_sub/MAIN
 echo "TRAINING CORPORA: $training_corpora" | tee -a $logs_sub_sub/MAIN
 echo "TESTING CORPORA: $testing_corpora" | tee -a $logs_sub_sub/MAIN
 echo "SEED: $seed" | tee -a $logs_sub_sub/MAIN
 echo "POSE_TYPE: $pose_type" | tee -a $logs_sub_sub/MAIN
 echo "SENTENCEPIECE_VOCAB_SIZE: $sentencepiece_vocab_size" | tee -a $logs_sub_sub/MAIN
 echo "FORCE_TARGET_FPS: $force_target_fps" | tee -a $logs_sub_sub/MAIN
+echo "NORMALIZE_POSES: $normalize_poses" | tee -a $logs_sub_sub/MAIN
+echo "BUCKET SCALING: $bucket_scaling" | tee -a $logs_sub_sub/MAIN
 echo "DRY RUN: $dry_run" | tee -a $logs_sub_sub/MAIN
 
 # download corpora
@@ -80,7 +102,7 @@ echo "DRY RUN: $dry_run" | tee -a $logs_sub_sub/MAIN
 id_download=$(python  -c 'import uuid; print(uuid.uuid4().hex)')
 
 $scripts/download/download_generic.sh \
-    $base "$training_corpora" \
+    $base "$training_corpora" $local_download_data \
     > $logs_sub_sub/slurm-$id_download.out 2> $logs_sub_sub/slurm-$id_download.out
 
 echo "  id_download: $id_download | $logs_sub_sub/slurm-$id_download.out" | tee -a $logs_sub_sub/MAIN
@@ -91,7 +113,7 @@ id_preprocess=$(python  -c 'import uuid; print(uuid.uuid4().hex)')
 
 $scripts/preprocessing/preprocess_generic.sh \
     $base $src $trg $model_name $dry_run $seed "$training_corpora" \
-    $fps $pose_type $sentencepiece_vocab_size $force_target_fps \
+    $fps $pose_type $sentencepiece_vocab_size $force_target_fps $normalize_poses \
     > $logs_sub_sub/slurm-$id_preprocess.out 2> $logs_sub_sub/slurm-$id_preprocess.out
 
 echo "  id_preprocess: $id_preprocess | $logs_sub_sub/slurm-$id_preprocess.out" | tee -a $logs_sub_sub/MAIN
@@ -101,7 +123,7 @@ echo "  id_preprocess: $id_preprocess | $logs_sub_sub/slurm-$id_preprocess.out" 
 id_prepare=$(python  -c 'import uuid; print(uuid.uuid4().hex)')
 
 $scripts/preprocessing/prepare_generic.sh \
-    $base $src $trg $model_name $seed $pose_type \
+    $base $src $trg $model_name $seed $pose_type $bucket_scaling \
     > $logs_sub_sub/slurm-$id_prepare.out 2> $logs_sub_sub/slurm-$id_prepare.out
 
 echo "  id_prepare: $id_prepare | $logs_sub_sub/slurm-$id_prepare.out"  | tee -a $logs_sub_sub/MAIN
@@ -111,7 +133,7 @@ echo "  id_prepare: $id_prepare | $logs_sub_sub/slurm-$id_prepare.out"  | tee -a
 id_train=$(python  -c 'import uuid; print(uuid.uuid4().hex)')
 
 $scripts/training/train_generic.sh \
-    $base $src $trg $model_name $dry_run $seed $pose_type \
+    $base $src $trg $model_name $dry_run $seed $pose_type $bucket_scaling \
     > $logs_sub_sub/slurm-$id_train.out 2> $logs_sub_sub/slurm-$id_train.out
 
 echo "  id_train: $id_train | $logs_sub_sub/slurm-$id_train.out"  | tee -a $logs_sub_sub/MAIN
