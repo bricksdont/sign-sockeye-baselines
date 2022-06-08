@@ -1,5 +1,16 @@
 # sign-sockeye-baselines
 
+## Attribution required
+
+If you use any of our code, please cite this repository as follows:
+
+    @misc{mueller2022easier-gloss-translation-models,
+        title={Sockeye baseline models for sign language translation},
+        author={M\"{u}ller, Mathias and Rios, Annette and Moryossef, Amit},
+        howpublished={\url{https://github.com/bricksdont/sign-sockeye-baselines}},
+        year={2022}
+    }
+
 ## Making changes to this repository
 
 The best way of collaborating on this code is to create new branches and then create pull request based on changes in
