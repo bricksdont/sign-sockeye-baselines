@@ -86,3 +86,4 @@ A baseline using SRF data:
 - augmentation, frame dropout from pose_format
 - deal with framerate differences better or make use of them for augmentation
 - graph encoder for poses
+- various forms of pre-training
