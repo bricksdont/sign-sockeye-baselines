@@ -42,9 +42,41 @@ Another important variable to change is `base`, which is defined
 in every top-level script (in `scripts/running`). `base` determines where
 files and folders should be written.
 
-Finally, set the variable `local_download_data` to indicate where you downloaded our training
-data. The path must be the folder which contains the sub-folders `srf` and `focusnews`, and optionally also
-`dev` and `test`.
+### Downloading or linking to downloaded data
+
+The scripts can either 1) download our training, dev and test data automatically and place them
+in the folder `download`, or 2) place links to existing files (that you downloaded manually)
+in `download`.
+
+Regardless of whether to download or link, the variable `training_corpora` in the run script
+determines which training corpora are considered. If `testing_corpora` contains `dev_unseen`
+or `test_unseen`, it is assumed that you would like to download (or link) the dev or
+test data we distribute separately.
+
+#### Automatic download
+
+If you'd like to download automatically from Zenodo, one or more environment variables
+containing private tokens for accessing Zenodo must be set when calling a run script. For example,
+to download FocusNews from Zenodo, a run script must be called as follows:
+
+    ZENODO_TOKEN_FOCUSNEWS="your private token" ./scripts/running/dry_run_baseline_focusnews.sh
+
+For SRF, both `ZENODO_TOKEN_SRF_POSES` and `ZENODO_TOKEN_SRF_VIDEOS_SUBTITLES` must be set.
+These private tokens can be obtained by visiting the deposit websites on Zenodo and requesting
+access. You will the be sent an email with a private link. The last portion of the private
+link is an access token.
+
+It is by design that these tokens cannot be defined as arguments in a run script since
+they should not appear in commits or logs.
+
+Also make sure that the variable `local_download_data` is not set in the run script.
+
+#### Link to manual download
+
+In the run script set the variable `local_download_data` to indicate where you downloaded the data.
+The path must be the folder which contains the sub-folders `srf` and `focusnews`, and optionally also
+`dev` and `test`. Each of these sub-folders in turn is expected to contain the sub-sub-folders
+`videos`, `subtitles`, `openpose` and `mediapipe`.
 
 ## Basic setup
 

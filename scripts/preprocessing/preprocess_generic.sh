@@ -12,6 +12,7 @@
 # $sentencepiece_vocab_size
 # $force_target_fps
 # $normalize_poses
+# $testing_corpora
 
 
 base=$1
@@ -25,6 +26,7 @@ pose_type=$8
 sentencepiece_vocab_size=$9
 force_target_fps=${10}
 normalize_poses=${11}
+testing_corpora=${12}
 
 download=$base/download
 data=$base/data
@@ -158,7 +160,13 @@ else
     train_size_arg=""
 fi
 
-for unseen_corpus in dev test; do
+# determine which testing corpora are not held out from our training data and are not preprocessed yet
+
+unseen_corpora=$(python $scripts/preprocessing/get_unseen_corpora_from_testing_corpora.py "$testing_corpora")
+
+echo "unseen testing corpora: $unseen_corpora"
+
+for unseen_corpus in $unseen_corpora; do
 
     # --output-prefix naming logic: [prefix].[for h5: openpose or mediapipe].{dev,test,train}.{txt,h5}.
 
