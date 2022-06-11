@@ -9,6 +9,8 @@
 
 set -u
 
+echo "REPEAT_DOWNLOAD_STEP: $repeat_download_step"
+
 sub_folders="data shared_models prepared models translations evaluations"
 
 echo "Could delete the following folders related to $src-$trg/$model_name:"
@@ -52,3 +54,5 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
         done
     fi
 fi
+
+set +u
