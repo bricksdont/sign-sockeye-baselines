@@ -42,6 +42,31 @@ Another important variable to change is `base`, which is defined
 in every top-level script (in `scripts/running`). `base` determines where
 files and folders should be written.
 
+#### Names of corpora
+
+The code assumes that `training_corpora` is set to `srf`, `focusnews` or both
+(`training_corpora="srf focusnews"`).
+
+The variable `testing_corpora` contains all
+corpora for which evaluation results should be produced. `testing_corpora` can
+contain four different names:
+
+- `dev`: if `dev` is part of `testing_corpora`, it is assumed that you would like to 
+translate and evaluate the held-out portion of the training data that is
+used during training (for early stopping)
+- `test`: translate and evaluate another held-out portion of the training data (different
+from `dev`)
+- `dev_unseen`: download (or link, see next section), preprocess, translate and evaluate the
+development data we distribute separately (may not be available to you yet)
+- `test_unseen`: download (or link, see next section), preprocess, translate and evaluate the
+test data we distribute separately (may not be available to you yet)
+
+`dev` and `test` are always split from the training data and preprocessed, regardless
+of whether they are in `testing_corpora`. Their current size is 100 random samples
+each.
+
+`dev_unseen` and `test_unseen` are only downloaded (or linked) and preprocessed if they appear in `testing_corpora`.
+
 ### Downloading or linking to downloaded data
 
 The scripts can either 1) download our training, dev and test data automatically and place them

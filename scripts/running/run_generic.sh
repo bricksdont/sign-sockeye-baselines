@@ -74,11 +74,11 @@ if [ -z "$force_target_fps" ]; then
 fi
 
 if [ -z "$normalize_poses" ]; then
-    normalize_poses="false"
+    normalize_poses="true"
 fi
 
 if [ -z "$bucket_scaling" ]; then
-    bucket_scaling="false"
+    bucket_scaling="true"
 fi
 
 # special consideration to Zenodo tokens
@@ -101,7 +101,6 @@ if [ -z "$ZENODO_TOKEN_SRF_VIDEOS_SUBTITLES" ]; then
 else
     zenodo_token_srf_videos_subtitles=$ZENODO_TOKEN_SRF_VIDEOS_SUBTITLES
 fi
-
 
 # after setting unset variables: fail if variables are still undefined
 
