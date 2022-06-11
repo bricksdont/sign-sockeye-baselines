@@ -15,21 +15,21 @@ echo "Could delete the following folders related to $src-$trg/$model_name:"
 
 for sub_folder in $sub_folders; do
   echo "$base/$sub_folder/$src-$trg/$model_name"
-
-  if [[ $repeat_download_step == "true" ]]; then
-      for training_corpus in $training_corpora; do
-          echo "$base/download/$training_corpus"
-      done
-
-      for testing_corpus in $testing_corpora; do
-
-          if [[ $testing_corpus == "dev" || $testing_corpus == "test" ]]; then
-              continue
-          fi
-          echo "$base/download/$testing_corpus"
-      done
-  fi
 done
+
+if [[ $repeat_download_step == "true" ]]; then
+    for training_corpus in $training_corpora; do
+        echo "$base/download/$training_corpus"
+    done
+
+    for testing_corpus in $testing_corpora; do
+
+        if [[ $testing_corpus == "dev" || $testing_corpus == "test" ]]; then
+            continue
+        fi
+        echo "$base/download/$testing_corpus"
+    done
+fi
 
 read -p "Delete? (y/n) " -n 1 -r
 echo    # (optional) move to a new line
