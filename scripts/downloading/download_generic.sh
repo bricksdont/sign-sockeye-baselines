@@ -37,6 +37,8 @@ for training_corpus in $training_corpora; do
           continue
     fi
 
+    mkdir -p $download_sub
+
     if [[ $local_download_data == "false" ]]; then
 
         # then download the data from Zenodo
@@ -69,17 +71,14 @@ for training_corpus in $training_corpora; do
 
             # finally combine data from both folders srf/zenodo_poses and srf/zenodo_videos_subtitles back into one
 
-            mkdir $download_sub/parallel $download_sub/monolingual
+            # note: this ignores the monolingual subtitles as they are not used by the baseline systems
 
-            mv $download_sub/zenodo_videos_subtitles/parallel/videos $download_sub/parallel/
-            mv $download_sub/zenodo_videos_subtitles/parallel/subtitles $download_sub/parallel/
-            mv $download_sub/zenodo_videos_subtitles/monolingual/subtitles $download_sub/monolingual/
+            ln -s  $download_sub/zenodo_videos_subtitles/parallel/videos $download_sub/videos
+            ln -s  $download_sub/zenodo_videos_subtitles/parallel/subtitles $download_sub/subtitles
 
-            mv $download_sub/zenodo_poses/parallel/openpose $download_sub/parallel/
-            mv $download_sub/zenodo_poses/parallel/mediapipe $download_sub/parallel/
+            ln -s  $download_sub/zenodo_poses/parallel/openpose $download_sub/openpose
+            ln -s  $download_sub/zenodo_poses/parallel/mediapipe $download_sub/mediapipe
 
-            rm -r $download_sub/zenodo_videos_subtitles
-            rm -r $download_sub/zenodo_poses
         fi
 
     else
