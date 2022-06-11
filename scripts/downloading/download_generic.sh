@@ -84,7 +84,8 @@ for training_corpus in $training_corpora; do
     else
         # in that case link existing files
 
-        corpus=$training_corpus
+        corpus_name=$training_corpus
+        original_corpus_name=$training_corpus
 
         . $scripts/downloading/download_link_folder_generic.sh
     fi
@@ -94,11 +95,18 @@ done
 
 for testing_corpus in $testing_corpora; do
 
+    # do nothing if the test corpus is "dev" or "test" since these are
+    # slices of the training data downloaded (or linked) above
+
+    if [[ $testing_corpus == "dev" || $testing_corpus == "test" ]]; then
+        continue
+    fi
+
     if [[ $testing_corpus == "dev_unseen" ]]; then
-        corpus="dev"
+        original_corpus_name="dev"
     elif [[ $testing_corpus == "test_unseen" ]]; then
         # assume test
-        corpus="test"
+        original_corpus_name="test"
     fi
 
     download_sub=$download/$testing_corpus
@@ -114,14 +122,14 @@ for testing_corpus in $testing_corpora; do
     if [[ $local_download_data == "false" ]]; then
 
         # TODO: download dev and test data instead of also linking locally here
-        corpus=$testing_corpus
+        corpus_name=$testing_corpus
 
         . $scripts/downloading/download_link_folder_generic.sh
 
     else
         # in that case link existing files
 
-        corpus=$testing_corpus
+        corpus_name=$testing_corpus
 
         . $scripts/downloading/download_link_folder_generic.sh
     fi

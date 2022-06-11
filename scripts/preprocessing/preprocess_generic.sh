@@ -160,20 +160,21 @@ else
     train_size_arg=""
 fi
 
-# determine which testing corpora are not held out from our training data and are not preprocessed yet
+for testing_corpus in $testing_corpora; do
 
-unseen_corpora=$(python $scripts/preprocessing/get_unseen_corpora_from_testing_corpora.py "$testing_corpora")
+    # do nothing if the test corpus is "dev" or "test" since these are
+    # generated and preprocessed above already
 
-echo "unseen testing corpora: $unseen_corpora"
+    if [[ $testing_corpus == "dev" || $testing_corpus == "test" ]]; then
+        continue
+    fi
 
-for unseen_corpus in $unseen_corpora; do
-
-    # --output-prefix naming logic: [prefix].[for h5: openpose or mediapipe].{dev,test,train}.{txt,h5}.
+    # --output-prefix naming logic: [output prefix].[for h5: openpose or mediapipe].{dev,test,train}.{txt,h5}.
 
     python $scripts/preprocessing/convert_and_split_data.py \
-            --download-sub $download/$unseen_corpus \
+            --download-sub $download/$testing_corpus \
             --output-dir $data_sub \
-            --output-prefix "${unseen_corpus}_unseen" \
+            --output-prefix $testing_corpus \
             --seed $seed \
             --dev-size 0 \
             --test-size 0 \
@@ -181,10 +182,10 @@ for unseen_corpus in $unseen_corpora; do
 
     # delete unused files and move to correct file extensions
 
-    rm $data_sub/"${unseen_corpus}_unseen".*{dev,test}.{h5,txt}
+    rm $data_sub/$testing_corpus.*{dev,test}.{h5,txt}
 
-    mv $data_sub/"${unseen_corpus}_unseen".$pose_type.train.h5 $data_sub/"${unseen_corpus}_unseen".src
-    mv $data_sub/"${unseen_corpus}_unseen".train.txt $data_sub/"${unseen_corpus}_unseen".trg
+    mv $data_sub/$testing_corpus.$pose_type.train.h5 $data_sub/$testing_corpus.src
+    mv $data_sub/$testing_corpus.train.txt $data_sub/$testing_corpus.trg
 
 done
 
