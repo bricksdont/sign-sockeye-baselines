@@ -50,7 +50,8 @@ def main():
     logging.basicConfig(level=logging.DEBUG)
     logging.debug(args)
 
-    json_dict = json.load(args.input)
+    with open(args.input) as infile:
+        json_dict = json.load(infile)
 
     file_dict = json_dict["files"][0]
 
