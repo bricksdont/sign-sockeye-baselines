@@ -65,6 +65,8 @@ for training_corpus in $training_corpora; do
             zenodo_deposit_id=$ZENODO_DEPOSIT_ID_SRF_POSES
             zenodo_token=$zenodo_token_srf_poses
 
+            mkdir -p $download_sub_zenodo
+
             . $scripts/downloading/download_zenodo_generic.sh
 
             # download videos and subtitles
@@ -72,6 +74,8 @@ for training_corpus in $training_corpora; do
             download_sub_zenodo=$download_sub/zenodo_videos_subtitles
             zenodo_deposit_id=$ZENODO_DEPOSIT_ID_SRF_VIDEOS_SUBTITLES
             zenodo_token=$zenodo_token_srf_videos_subtitles
+
+            mkdir -p $download_sub_zenodo
 
             . $scripts/downloading/download_zenodo_generic.sh
 
