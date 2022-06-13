@@ -86,7 +86,7 @@ to download FocusNews from Zenodo, a run script must be called as follows:
 
     ZENODO_TOKEN_FOCUSNEWS="your private token" ./scripts/running/dry_run_baseline_focusnews.sh
 
-For SRF, both `ZENODO_TOKEN_SRF_POSES` and `ZENODO_TOKEN_SRF_VIDEOS_SUBTITLES` must be set.
+For SRF, both `ZENODO_TOKEN_SRF_POSES` and `ZENODO_TOKEN_SRF_VIDEOS_SUBTITLES` must be set, or exported beforehand.
 These private tokens can be obtained by visiting the deposit websites on Zenodo and requesting
 access. You will the be sent an email with a private link. The last portion of the private
 link is an access token.

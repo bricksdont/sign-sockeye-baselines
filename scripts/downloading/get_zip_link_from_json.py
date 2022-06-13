@@ -53,13 +53,24 @@ def main():
     with open(args.input) as infile:
         json_dict = json.load(infile)
 
-    file_dict = json_dict["files"][0]
+    file_dicts = json_dict["files"]
 
-    assert file_dict["type"] == "zip"
+    for file_dict in file_dicts:
 
-    link = file_dict["links"]["self"]
+        filename = file_dict["key"]
+        link = file_dict["links"]["self"]
 
-    print(link)
+        if file_dict["type"] != "zip":
+
+            logging.debug("Ignoring file that is not a zip folder: %s | %s" % (filename, link))
+
+            continue
+
+        logging.debug("Found zip file: %s | %s" % (filename, link))
+
+        print(link)
+
+        break
 
 
 if __name__ == '__main__':
