@@ -22,6 +22,9 @@ curl --cookie $download_sub_zenodo/zenodo-cookies.txt \
 
 zip_link=$(python3 $scripts/downloading/get_zip_link_from_json.py --input $download_sub_zenodo/api_response.json)
 
+echo "Executing:"
+echo "curl --cookie $download_sub_zenodo/zenodo-cookies.txt $zip_link > $download_sub_zenodo/$training_corpus.zip"
+
 curl --cookie $download_sub_zenodo/zenodo-cookies.txt $zip_link > $download_sub_zenodo/$training_corpus.zip
 
 (cd $download_sub_zenodo && unzip $training_corpus.zip)

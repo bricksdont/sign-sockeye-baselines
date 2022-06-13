@@ -3,7 +3,7 @@
 base=/net/cephfs/shares/volk.cl.uzh/mathmu/sign-sockeye-baselines
 scripts=$base/scripts
 
-local_download_data="/net/cephfs/shares/volk.cl.uzh/EASIER/WMT_Shared_Task/"
+local_download_data="/net/cephfs/shares/volk.cl.uzh/EASIER/WMT_Shared_Task"
 
 # DSGS -> German
 

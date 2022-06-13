@@ -128,7 +128,7 @@ for testing_corpus in $testing_corpora; do
     if [[ $local_download_data == "false" ]]; then
 
         # TODO: download dev and test data instead of also linking locally here once it is available online
-        local_download_data="/net/cephfs/shares/volk.cl.uzh/EASIER/WMT_Shared_Task/"
+        local_download_data="/net/cephfs/shares/volk.cl.uzh/EASIER/WMT_Shared_Task"
 
         corpus_name=$testing_corpus
 
