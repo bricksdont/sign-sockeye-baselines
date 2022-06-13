@@ -26,7 +26,7 @@ baseline experiments). CUDA and CuDNN must be installed.
 
 If you would like to train baselines without modifying the code, execute one of the scripts in `scripts/running`. Each
 of these scripts defines a "run". Our definition of a "run" is a complete experiment, in the sense that the script will
-execute all steps necessary including downloading the data, preprocessing, training, translating and evaluation the system.
+execute all steps necessary including downloading the data, preprocessing, training, translating and evaluating the system.
 
 All steps have separate logs that can be inspected and if a step fails, the pipeline can be re-run without executing previous,
 successful steps again. On a scheduling system like SLURM, steps will be submitted to the scheduler at the same time and
