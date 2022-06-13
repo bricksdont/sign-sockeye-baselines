@@ -17,7 +17,7 @@ model_name="baseline_focusnews"
 pose_type="openpose"
 
 training_corpora="focusnews"
-testing_corpora="test unseen"
+testing_corpora="test dev_unseen test_unseen"
 
 force_target_fps="false"
 normalize_poses="true"

@@ -21,7 +21,7 @@ model_name="dry_run_srf"
 pose_type="openpose"
 
 training_corpora="srf"
-testing_corpora="test unseen"
+testing_corpora="test dev_unseen test_unseen"
 
 force_target_fps="false"
 normalize_poses="false"
