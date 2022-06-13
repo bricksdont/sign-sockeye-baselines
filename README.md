@@ -119,6 +119,10 @@ Try to create all files and run all scripts, but on CPU only and exit immediatel
 
     ./scripts/running/dry_run_baseline_focusnews.sh
 
+By default, dry runs do not repeat the download step (meaning: dry runs prompt the user to delete all folders related to
+a specific model, but by default do _not_ remove the download folder). To also repeat the download step, set
+`repeat_download_step="true"`.
+
 And a dry run for srf training data:
 
     ./scripts/running/dry_run_baseline_srf.sh
