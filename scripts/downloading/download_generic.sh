@@ -25,6 +25,12 @@ venvs=$base/venvs
 
 mkdir -p $download
 
+# these IDs change if a new version is released on Zenodo
+
+ZENODO_DEPOSIT_ID_FOCUSNEWS=6631159
+ZENODO_DEPOSIT_ID_SRF_POSES=6631275
+ZENODO_DEPOSIT_ID_SRF_VIDEOS_SUBTITLES=6635710
+
 # only download if user indicated they have *not* already downloaded elsewhere
 
 for training_corpus in $training_corpora; do
@@ -46,7 +52,7 @@ for training_corpus in $training_corpora; do
         if [[ $training_corpus == "focusnews" ]]; then
 
             download_sub_zenodo=$download_sub
-            zenodo_deposit_id=6621480
+            zenodo_deposit_id=$ZENODO_DEPOSIT_ID_FOCUSNEWS
             zenodo_token=$zenodo_token_focusnews
 
             . $scripts/downloading/download_zenodo_generic.sh
@@ -56,7 +62,7 @@ for training_corpus in $training_corpora; do
             # download poses
 
             download_sub_zenodo=$download_sub/zenodo_poses
-            zenodo_deposit_id=6630145
+            zenodo_deposit_id=$ZENODO_DEPOSIT_ID_SRF_POSES
             zenodo_token=$zenodo_token_srf_poses
 
             . $scripts/downloading/download_zenodo_generic.sh
@@ -64,7 +70,7 @@ for training_corpus in $training_corpora; do
             # download videos and subtitles
 
             download_sub_zenodo=$download_sub/zenodo_videos_subtitles
-            zenodo_deposit_id="?"  # TODO
+            zenodo_deposit_id=$ZENODO_DEPOSIT_ID_SRF_VIDEOS_SUBTITLES
             zenodo_token=$zenodo_token_srf_videos_subtitles
 
             . $scripts/downloading/download_zenodo_generic.sh
@@ -121,7 +127,7 @@ for testing_corpus in $testing_corpora; do
 
     if [[ $local_download_data == "false" ]]; then
 
-        # TODO: download dev and test data instead of also linking locally here
+        # TODO: download dev and test data instead of also linking locally here once it is available online
         local_download_data="/net/cephfs/shares/volk.cl.uzh/EASIER/WMT_Shared_Task/"
 
         corpus_name=$testing_corpus

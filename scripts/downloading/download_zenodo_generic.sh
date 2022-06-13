@@ -36,8 +36,4 @@ mv $download_sub_zenodo/$training_corpus/* $download_sub_zenodo/
 rm -r $download_sub_zenodo/$training_corpus
 rm $download_sub_zenodo/$training_corpus.zip
 
-# TODO: remove this once Focusnews 1.1 is released on Zenodo
-
-rm -r $download_sub_zenodo/__MACOSX
-
 rm $download_sub_zenodo/zenodo-cookies.txt
