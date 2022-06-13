@@ -18,6 +18,12 @@
 # $normalize_poses
 # $bucket_scaling
 # $local_download_data
+#
+# optional environment variables to be set when calling a run script (these are private tokens that should not appear
+# in logs or commits):
+# $ZENODO_TOKEN_FOCUSNEWS
+# $ZENODO_TOKEN_SRF_POSES
+# $ZENODO_TOKEN_SRF_VIDEOS_SUBTITLES
 
 scripts=$base/scripts
 logs=$base/logs
@@ -75,6 +81,27 @@ if [ -z "$bucket_scaling" ]; then
     bucket_scaling="false"
 fi
 
+# special consideration to Zenodo tokens
+# (these must be set as environment variables before / when calling a run script)
+
+if [ -z "$ZENODO_TOKEN_FOCUSNEWS" ]; then
+    zenodo_token_focusnews="none"
+else
+    zenodo_token_focusnews=$ZENODO_TOKEN_FOCUSNEWS
+fi
+
+if [ -z "$ZENODO_TOKEN_SRF_POSES" ]; then
+    zenodo_token_srf_poses="none"
+else
+    zenodo_token_srf_poses=$ZENODO_TOKEN_SRF_POSES
+fi
+
+if [ -z "$ZENODO_TOKEN_SRF_VIDEOS_SUBTITLES" ]; then
+    zenodo_token_srf_videos_subtitles="none"
+else
+    zenodo_token_srf_videos_subtitles=$ZENODO_TOKEN_SRF_VIDEOS_SUBTITLES
+fi
+
 # after setting unset variables: fail if variables are still undefined
 
 set -u
@@ -101,8 +128,9 @@ echo "DRY RUN: $dry_run" | tee -a $logs_sub_sub/MAIN
 
 id_download=$(python  -c 'import uuid; print(uuid.uuid4().hex)')
 
-$scripts/download/download_generic.sh \
-    $base "$training_corpora" $local_download_data \
+$scripts/downloading/download_generic.sh \
+    $base "$training_corpora" $local_download_data "$testing_corpora" \
+    $zenodo_token_focusnews $zenodo_token_srf_poses $zenodo_token_srf_videos_subtitles \
     > $logs_sub_sub/slurm-$id_download.out 2> $logs_sub_sub/slurm-$id_download.out
 
 echo "  id_download: $id_download | $logs_sub_sub/slurm-$id_download.out" | tee -a $logs_sub_sub/MAIN
@@ -113,7 +141,7 @@ id_preprocess=$(python  -c 'import uuid; print(uuid.uuid4().hex)')
 
 $scripts/preprocessing/preprocess_generic.sh \
     $base $src $trg $model_name $dry_run $seed "$training_corpora" \
-    $fps $pose_type $sentencepiece_vocab_size $force_target_fps $normalize_poses \
+    $fps $pose_type $sentencepiece_vocab_size $force_target_fps $normalize_poses "$testing_corpora" \
     > $logs_sub_sub/slurm-$id_preprocess.out 2> $logs_sub_sub/slurm-$id_preprocess.out
 
 echo "  id_preprocess: $id_preprocess | $logs_sub_sub/slurm-$id_preprocess.out" | tee -a $logs_sub_sub/MAIN

@@ -3,6 +3,8 @@
 base=/net/cephfs/shares/volk.cl.uzh/mathmu/sign-sockeye-baselines
 scripts=$base/scripts
 
+local_download_data="/net/cephfs/shares/volk.cl.uzh/EASIER/WMT_Shared_Task"
+
 # DSGS -> German
 
 src="dsgs"
@@ -13,7 +15,7 @@ pose_type="openpose"
 bucket_scaling="true"
 normalize_poses="true"
 
-testing_corpora="test unseen"
+testing_corpora="test dev_unseen test_unseen"
 
 for pose_type in openpose mediapipe; do
     for training_corpus in srf focusnews; do

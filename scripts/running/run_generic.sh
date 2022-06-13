@@ -17,6 +17,12 @@
 # $normalize_poses
 # $bucket_scaling
 # $local_download_data
+#
+# optional environment variables to be set when calling a run script (these are private tokens that should not appear
+# in logs or commits):
+# $ZENODO_TOKEN_FOCUSNEWS
+# $ZENODO_TOKEN_SRF_POSES
+# $ZENODO_TOKEN_SRF_VIDEOS_SUBTITLES
 
 module load volta nvidia/cuda10.2-cudnn7.6.5 anaconda3
 
@@ -40,7 +46,7 @@ if [ -z "$dry_run" ]; then
 fi
 
 if [ -z "$local_download_data" ]; then
-    local_download_data="/net/cephfs/shares/volk.cl.uzh/EASIER/WMT_Shared_Task/"
+    local_download_data="false"
 fi
 
 if [ -z "$training_corpora" ]; then
@@ -68,11 +74,32 @@ if [ -z "$force_target_fps" ]; then
 fi
 
 if [ -z "$normalize_poses" ]; then
-    normalize_poses="false"
+    normalize_poses="true"
 fi
 
 if [ -z "$bucket_scaling" ]; then
-    bucket_scaling="false"
+    bucket_scaling="true"
+fi
+
+# special consideration to Zenodo tokens
+# (these must be set as environment variables before / when calling a run script)
+
+if [ -z "$ZENODO_TOKEN_FOCUSNEWS" ]; then
+    zenodo_token_focusnews="none"
+else
+    zenodo_token_focusnews=$ZENODO_TOKEN_FOCUSNEWS
+fi
+
+if [ -z "$ZENODO_TOKEN_SRF_POSES" ]; then
+    zenodo_token_srf_poses="none"
+else
+    zenodo_token_srf_poses=$ZENODO_TOKEN_SRF_POSES
+fi
+
+if [ -z "$ZENODO_TOKEN_SRF_VIDEOS_SUBTITLES" ]; then
+    zenodo_token_srf_videos_subtitles="none"
+else
+    zenodo_token_srf_videos_subtitles=$ZENODO_TOKEN_SRF_VIDEOS_SUBTITLES
 fi
 
 # after setting unset variables: fail if variables are still undefined
@@ -119,8 +146,9 @@ id_download=$(
     $scripts/running/sbatch_bare.sh \
     $SLURM_ARGS_GENERIC \
     $SLURM_LOG_ARGS \
-    $scripts/download/download_generic.sh \
-    $base "$training_corpora" $local_download_data
+    $scripts/downloading/download_generic.sh \
+    $base "$training_corpora" $local_download_data "$testing_corpora" \
+    $zenodo_token_focusnews $zenodo_token_srf_poses $zenodo_token_srf_videos_subtitles
 )
 
 echo "  id_download: $id_download | $logs_sub_sub/slurm-$id_download.out" | tee -a $logs_sub_sub/MAIN
@@ -134,7 +162,7 @@ id_preprocess=$(
     $SLURM_LOG_ARGS \
     $scripts/preprocessing/preprocess_generic.sh \
     $base $src $trg $model_name $dry_run $seed "$training_corpora" \
-    $pose_type $sentencepiece_vocab_size $force_target_fps $normalize_poses
+    $pose_type $sentencepiece_vocab_size $force_target_fps $normalize_poses "$testing_corpora"
 )
 
 echo "  id_preprocess: $id_preprocess | $logs_sub_sub/slurm-$id_preprocess.out" | tee -a $logs_sub_sub/MAIN
