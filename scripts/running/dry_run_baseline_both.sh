@@ -24,7 +24,9 @@ training_corpora="focusnews srf"
 testing_corpora="test dev_unseen test_unseen"
 
 force_target_fps="false"
-normalize_poses="false"
+normalize_poses="true"
+
+bucket_scaling="true"
 
 # this argument is for dry runs only, set to "true" to also repeat downloads (or linking)
 
