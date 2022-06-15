@@ -9,6 +9,8 @@
 # $seed
 # $pose_type
 # $bucket_scaling
+# $max_seq_len_source
+# $bucket_width
 
 base=$1
 src=$2
@@ -17,6 +19,8 @@ model_name=$4
 seed=$5
 pose_type=$6
 bucket_scaling=$7
+max_seq_len_source=$8
+bucket_width=$9
 
 # measure time
 
@@ -60,7 +64,7 @@ else
     bucket_scaling_arg=""
 fi
 
-cmd="python -m sockeye.prepare_data -s $data_sub_sub/train.src -t $data_sub_sub/train.pieces.trg -o $prepared_sub_sub --max-seq-len 500:250 --seed $seed --source-is-continuous --source-continuous-num-features $num_features $bucket_scaling_arg"
+cmd="python -m sockeye.prepare_data -s $data_sub_sub/train.src -t $data_sub_sub/train.pieces.trg -o $prepared_sub_sub --max-seq-len $max_seq_len_source:250 --seed $seed --source-is-continuous --source-continuous-num-features $num_features --bucket-width $bucket_width $bucket_scaling_arg"
 
 echo "Executing:"
 echo "$cmd"
@@ -69,10 +73,11 @@ python -m sockeye.prepare_data \
                         -s $data_sub_sub/train.src \
                         -t $data_sub_sub/train.pieces.trg \
                         -o $prepared_sub_sub \
-                        --max-seq-len 500:250 \
+                        --max-seq-len $max_seq_len_source:250 \
                         --seed $seed \
                         --source-is-continuous \
-                        --source-continuous-num-features $num_features $bucket_scaling_arg
+                        --source-continuous-num-features $num_features \
+                        --bucket-width $bucket_width $bucket_scaling_arg
 
 echo "time taken:"
 echo "$SECONDS seconds"

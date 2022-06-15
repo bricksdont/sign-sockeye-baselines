@@ -12,6 +12,10 @@
 # $bucket_scaling
 # $max_seq_len_source
 # $bucket_width
+# $initial_learning_rate
+# $dropout
+# $num_layers_encoder
+# $num_layers_decoder
 
 base=$1
 src=$2
@@ -23,6 +27,10 @@ pose_type=$7
 bucket_scaling=$8
 max_seq_len_source=$9
 bucket_width=${10}
+initial_learning_rate=${11}
+dropout=${12}
+num_layers_encoder=${13}
+num_layers_decoder=${14}
 
 venvs=$base/venvs
 
@@ -49,67 +57,19 @@ set -u
 
 # parameters are the same for all Transformer models
 
-fc_embed_dropout_pre="0.0"
 num_embed="512:512"
-num_layers="6:6"
+num_layers="$num_layers_encoder:$num_layers_decoder"
 transformer_model_size="512"
 transformer_attention_heads="8"
 transformer_feed_forward_num_hidden="2048"
 
-# parameters vary depending on training data size
-
-SMALLEST_TRAINSIZE=10000
-SMALL_TRAINSIZE=100000
-MEDIUM_TRAINSIZE=500000
-LARGE_TRAINSIZE=1000000
-LARGEST_TRAINSIZE=10000000
-
-num_lines=$(cat $data_sub_sub/train.pieces.trg | wc -l)
-
-if [[ $num_lines -gt ${LARGEST_TRAINSIZE} ]]; then
-    embed_dropout=0.1
-    fc_embed_dropout_post=0.1
-    transformer_dropout=0.1
-    batch_size=4096
-    decode_and_evaluate=2500
-    checkpoint_interval=5000
-elif [[ $num_lines -gt ${LARGE_TRAINSIZE} ]]; then
-    embed_dropout=0.1
-    fc_embed_dropout_post=0.1
-    transformer_dropout=0.1
-    batch_size=4096
-    decode_and_evaluate=2500
-    checkpoint_interval=5000
-elif [[ $num_lines -gt ${MEDIUM_TRAINSIZE} ]]; then
-    embed_dropout=0.1
-    fc_embed_dropout_post=0.1
-    transformer_dropout=0.1
-    batch_size=4096
-    decode_and_evaluate=2500
-    checkpoint_interval=5000
-elif [[ $num_lines -gt ${SMALL_TRAINSIZE} ]]; then
-    embed_dropout=0.2
-    fc_embed_dropout_post=0.2
-    transformer_dropout=0.2
-    batch_size=2048
-    decode_and_evaluate=1000
-    checkpoint_interval=1000
-elif [[ $num_lines -gt ${SMALLEST_TRAINSIZE} ]]; then
-    embed_dropout=0.5
-    fc_embed_dropout_post=0.5
-    transformer_dropout=0.5
-    batch_size=1024
-    decode_and_evaluate=500
-    checkpoint_interval=1000
-else
-    echo "Warning: training data size appears too small to train a model"
-    embed_dropout=0.5
-    fc_embed_dropout_post=0.5
-    transformer_dropout=0.5
-    batch_size=1024
-    decode_and_evaluate=500
-    checkpoint_interval=1000
-fi
+embed_dropout=$dropout
+fc_embed_dropout_pre=$dropout
+fc_embed_dropout_post=$dropout
+transformer_dropout=$dropout
+batch_size=1024
+decode_and_evaluate=500
+checkpoint_interval=1000
 
 # check if training is finished
 
@@ -182,7 +142,7 @@ python -m sockeye.train \
 --num-embed $num_embed \
 --num-words 64000:64000 \
 --optimizer adam \
---initial-learning-rate 0.0001 \
+--initial-learning-rate $initial_learning_rate \
 --learning-rate-reduce-num-not-improved 4 \
 --checkpoint-interval $checkpoint_interval \
 --keep-last-params 30 \

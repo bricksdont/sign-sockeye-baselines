@@ -19,6 +19,10 @@
 # $local_download_data
 # $$max_seq_len_source
 # $bucket_width
+# $initial_learning_rate
+# $dropout
+# $num_layers_encoder
+# $num_layers_decoder
 #
 # optional environment variables to be set when calling a run script (these are private tokens that should not appear
 # in logs or commits):
@@ -85,6 +89,22 @@ fi
 
 if [ -z "$bucket_width" ]; then
     bucket_width=16
+fi
+
+if [ -z "$initial_learning_rate" ]; then
+    initial_learning_rate="0.0001"
+fi
+
+if [ -z "$dropout" ]; then
+    dropout="0.1"
+fi
+
+if [ -z "$num_layers_encoder" ]; then
+    num_layers_encoder=6
+fi
+
+if [ -z "$num_layers_decoder" ]; then
+    num_layers_decoder=6
 fi
 
 if [ -z "$max_seq_len_source" ]; then
@@ -186,7 +206,7 @@ id_prepare=$(
     --dependency=afterok:$id_preprocess \
     $SLURM_LOG_ARGS \
     $scripts/preprocessing/prepare_generic.sh \
-    $base $src $trg $model_name $seed $pose_type $bucket_scaling
+    $base $src $trg $model_name $seed $pose_type $bucket_scaling $max_seq_len_source $bucket_width
 )
 
 echo "  id_prepare: $id_prepare | $logs_sub_sub/slurm-$id_prepare.out"  | tee -a $logs_sub_sub/MAIN
@@ -199,7 +219,8 @@ id_train=$(
     --dependency=afterok:$id_prepare \
     $SLURM_LOG_ARGS \
     $scripts/training/train_generic.sh \
-    $base $src $trg $model_name $dry_run $seed $pose_type $bucket_scaling $max_seq_len_source $bucket_width
+    $base $src $trg $model_name $dry_run $seed $pose_type $bucket_scaling $max_seq_len_source \
+    $bucket_width $initial_learning_rate $dropout $num_layers_encoder $num_layers_decoder
 )
 
 echo "  id_train: $id_train | $logs_sub_sub/slurm-$id_train.out"  | tee -a $logs_sub_sub/MAIN
