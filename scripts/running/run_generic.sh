@@ -168,7 +168,13 @@ echo "SENTENCEPIECE_VOCAB_SIZE: $sentencepiece_vocab_size" | tee -a $logs_sub_su
 echo "FORCE_TARGET_FPS: $force_target_fps" | tee -a $logs_sub_sub/MAIN
 echo "NORMALIZE_POSES: $normalize_poses" | tee -a $logs_sub_sub/MAIN
 echo "BUCKET SCALING: $bucket_scaling" | tee -a $logs_sub_sub/MAIN
+echo "BUCKET_WIDTH: $bucket_width" | tee -a $logs_sub_sub/MAIN
 echo "MAX_SEQ_LEN_SOURCE: $max_seq_len_source" | tee -a $logs_sub_sub/MAIN
+echo "INITIAL_LEARNING_RATE: $initial_learning_rate" | tee -a $logs_sub_sub/MAIN
+echo "DROPOUT: $dropout" | tee -a $logs_sub_sub/MAIN
+echo "NUM_LAYERS_ENCODER: $num_layers_encoder" | tee -a $logs_sub_sub/MAIN
+echo "NUM_LAYERS_DECODER: $num_layers_decoder" | tee -a $logs_sub_sub/MAIN
+
 echo "DRY RUN: $dry_run" | tee -a $logs_sub_sub/MAIN
 
 # download corpora
