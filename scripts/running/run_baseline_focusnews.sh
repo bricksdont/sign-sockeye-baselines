@@ -19,8 +19,8 @@ pose_type="openpose"
 training_corpora="focusnews"
 testing_corpora="test dev_unseen test_unseen"
 
-force_target_fps="false"
+force_target_fps="true"
 normalize_poses="true"
-bucket_scaling="false"
+bucket_scaling="true"
 
 . $scripts/running/run_generic.sh

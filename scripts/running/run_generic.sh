@@ -18,6 +18,7 @@
 # $bucket_scaling
 # $local_download_data
 # $$max_seq_len_source
+# $bucket_width
 #
 # optional environment variables to be set when calling a run script (these are private tokens that should not appear
 # in logs or commits):
@@ -80,6 +81,10 @@ fi
 
 if [ -z "$bucket_scaling" ]; then
     bucket_scaling="true"
+fi
+
+if [ -z "$bucket_width" ]; then
+    bucket_width=16
 fi
 
 if [ -z "$max_seq_len_source" ]; then
@@ -194,7 +199,7 @@ id_train=$(
     --dependency=afterok:$id_prepare \
     $SLURM_LOG_ARGS \
     $scripts/training/train_generic.sh \
-    $base $src $trg $model_name $dry_run $seed $pose_type $bucket_scaling $max_seq_len_source
+    $base $src $trg $model_name $dry_run $seed $pose_type $bucket_scaling $max_seq_len_source $bucket_width
 )
 
 echo "  id_train: $id_train | $logs_sub_sub/slurm-$id_train.out"  | tee -a $logs_sub_sub/MAIN

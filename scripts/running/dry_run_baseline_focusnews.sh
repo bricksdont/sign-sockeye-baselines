@@ -16,14 +16,14 @@ dry_run="true"
 
 # baseline
 
-model_name="dry_run_focusnews"
+model_name="dry_run_baseline_both"
 
 pose_type="openpose"
 
 training_corpora="focusnews"
 testing_corpora="test dev_unseen test_unseen"
 
-force_target_fps="false"
+force_target_fps="true"
 normalize_poses="true"
 
 bucket_scaling="true"

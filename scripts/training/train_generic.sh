@@ -11,6 +11,7 @@
 # $pose_type
 # $bucket_scaling
 # $max_seq_len_source
+# $bucket_width
 
 base=$1
 src=$2
@@ -21,6 +22,7 @@ seed=$6
 pose_type=$7
 bucket_scaling=$8
 max_seq_len_source=$9
+bucket_width=${10}
 
 venvs=$base/venvs
 
@@ -41,7 +43,7 @@ mkdir -p $models_sub_sub
 eval "$(conda shell.bash hook)"
 source activate $venvs/sockeye3
 
-# after ativating the env on purpose
+# after activating the env on purpose
 
 set -u
 
@@ -157,6 +159,7 @@ python -m sockeye.train \
 --seed $seed \
 --batch-type word \
 --batch-size $batch_size \
+--bucket-width $bucket_width \
 --device-id 0 \
 --source-is-continuous \
 --source-continuous-num-features $num_features \
