@@ -17,6 +17,7 @@
 # $normalize_poses
 # $bucket_scaling
 # $local_download_data
+# $$max_seq_len_source
 #
 # optional environment variables to be set when calling a run script (these are private tokens that should not appear
 # in logs or commits):
@@ -81,6 +82,10 @@ if [ -z "$bucket_scaling" ]; then
     bucket_scaling="true"
 fi
 
+if [ -z "$max_seq_len_source" ]; then
+    max_seq_len_source=500
+fi
+
 # special consideration to Zenodo tokens
 # (these must be set as environment variables before / when calling a run script)
 
@@ -138,6 +143,7 @@ echo "SENTENCEPIECE_VOCAB_SIZE: $sentencepiece_vocab_size" | tee -a $logs_sub_su
 echo "FORCE_TARGET_FPS: $force_target_fps" | tee -a $logs_sub_sub/MAIN
 echo "NORMALIZE_POSES: $normalize_poses" | tee -a $logs_sub_sub/MAIN
 echo "BUCKET SCALING: $bucket_scaling" | tee -a $logs_sub_sub/MAIN
+echo "MAX_SEQ_LEN_SOURCE: $max_seq_len_source" | tee -a $logs_sub_sub/MAIN
 echo "DRY RUN: $dry_run" | tee -a $logs_sub_sub/MAIN
 
 # download corpora
@@ -188,7 +194,7 @@ id_train=$(
     --dependency=afterok:$id_prepare \
     $SLURM_LOG_ARGS \
     $scripts/training/train_generic.sh \
-    $base $src $trg $model_name $dry_run $seed $pose_type $bucket_scaling
+    $base $src $trg $model_name $dry_run $seed $pose_type $bucket_scaling $max_seq_len_source
 )
 
 echo "  id_train: $id_train | $logs_sub_sub/slurm-$id_train.out"  | tee -a $logs_sub_sub/MAIN

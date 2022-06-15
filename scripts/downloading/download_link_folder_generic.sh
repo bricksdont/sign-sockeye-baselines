@@ -18,6 +18,7 @@ for sub_folder in subtitles openpose mediapipe videos; do
 
     for original_file in $local_download_data_sub_sub/*; do
         original_basename=$(basename $original_file)
-        ln -s $original_file $download_sub_sub/$original_basename
+        linkname=$(python $scripts/preprocessing/get_linkname_unseen_corpus.py $original_basename)
+        ln -s $original_file $download_sub_sub/$linkname
     done
 done

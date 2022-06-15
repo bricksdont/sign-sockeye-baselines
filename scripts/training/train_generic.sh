@@ -10,6 +10,7 @@
 # $seed
 # $pose_type
 # $bucket_scaling
+# $max_seq_len_source
 
 base=$1
 src=$2
@@ -19,6 +20,7 @@ dry_run=$5
 seed=$6
 pose_type=$7
 bucket_scaling=$8
+max_seq_len_source=$9
 
 venvs=$base/venvs
 
@@ -181,7 +183,7 @@ python -m sockeye.train \
 --learning-rate-reduce-num-not-improved 4 \
 --checkpoint-interval $checkpoint_interval \
 --keep-last-params 30 \
---max-seq-len 500:250 \
+--max-seq-len $max_seq_len_source:250 \
 --learning-rate-reduce-factor 0.7 \
 --decode-and-evaluate $decode_and_evaluate \
 --max-num-checkpoint-not-improved 10 \
