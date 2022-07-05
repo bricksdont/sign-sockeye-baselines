@@ -140,7 +140,7 @@ for testing_corpus in $testing_corpora; do
 
             wget $DEV_URL -P $download_sub
             (cd $download_sub && tar -xzvf dev.v$DEV_VERSION.tar.gz)
-            mv $download_sub/dev/* $download_sub
+            mv $download_sub/dev/dsgs-de/* $download_sub
         else
             # assume testing_corpus is "test_unseen"
 
