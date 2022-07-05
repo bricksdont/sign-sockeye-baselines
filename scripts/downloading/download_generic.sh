@@ -31,6 +31,11 @@ ZENODO_DEPOSIT_ID_FOCUSNEWS=6631159
 ZENODO_DEPOSIT_ID_SRF_POSES=6631275
 ZENODO_DEPOSIT_ID_SRF_VIDEOS_SUBTITLES=6637392
 
+# update if a new version is released
+
+DEV_VERSION="3.0"
+DEV_URL="https://files.ifi.uzh.ch/cl/archiv/2022/easier/wmtslt/dev/dev.v$DEV_VERSION.tar.gz"
+
 # only download if user indicated they have *not* already downloaded elsewhere
 
 for training_corpus in $training_corpora; do
@@ -131,12 +136,22 @@ for testing_corpus in $testing_corpora; do
 
     if [[ $local_download_data == "false" ]]; then
 
-        # TODO: download dev and test data instead of also linking locally here once it is available online
-        local_download_data="/net/cephfs/shares/volk.cl.uzh/EASIER/WMT_Shared_Task"
+        if [[ $testing_corpus == "dev_unseen" ]]; then
 
-        corpus_name=$testing_corpus
+            wget $DEV_URL -P $download_sub
+            (cd $download_sub && tar -xzvf dev.v$DEV_VERSION.tar.gz)
+            mv $download_sub/dev/* $download_sub
+        else
+            # assume testing_corpus is "test_unseen"
 
-        . $scripts/downloading/download_link_folder_generic.sh
+            # TODO: download test data instead of also linking locally here once it is available online
+            local_download_data="/net/cephfs/shares/volk.cl.uzh/EASIER/WMT_Shared_Task"
+
+            corpus_name=$testing_corpus
+
+            . $scripts/downloading/download_link_folder_generic.sh
+
+        fi
 
     else
         # in that case link existing files
