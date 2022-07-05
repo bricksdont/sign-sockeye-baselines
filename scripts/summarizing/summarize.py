@@ -127,7 +127,7 @@ def parse_model_name(model_name: str) -> Tuple[str, str, str, str, str]:
     """
     training_corpus, force_target_fps, normalize_poses, pose_type, bucket_scaling = "-", "-", "-", "-", "-"
 
-    if "dry_run" in model_name:
+    if "dry_run" in model_name or "baseline" in model_name:
         return training_corpus, force_target_fps, normalize_poses, pose_type, bucket_scaling
 
     pairs = model_name.split("+")
@@ -146,8 +146,8 @@ def parse_model_name(model_name: str) -> Tuple[str, str, str, str, str]:
         elif key == "bucket_scaling":
             bucket_scaling = value
         else:
-            logging.warning("Could not parse (key, value:): %s, %s", key, value)
-            raise NotImplementedError
+            logging.warning("Ignoring unknown (key, value:): %s, %s", key, value)
+            continue
 
     return training_corpus, force_target_fps, normalize_poses, pose_type, bucket_scaling
 
