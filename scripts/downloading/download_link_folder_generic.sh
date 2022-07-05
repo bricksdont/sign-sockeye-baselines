@@ -6,6 +6,8 @@
 
 if [[ $corpus_name == "srf" ]]; then
     local_download_data_sub=$local_download_data/$original_corpus_name/parallel
+elif [[ $corpus_name == "test_unseen" ]]; then
+    local_download_data_sub=$local_download_data/$original_corpus_name/dsgs-de
 else
     local_download_data_sub=$local_download_data/$original_corpus_name
 fi
