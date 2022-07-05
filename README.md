@@ -75,7 +75,7 @@ in `download`.
 
 Regardless of whether to download or link, the variable `training_corpora` in the run script
 determines which training corpora are considered. If `testing_corpora` contains `dev_unseen`
-or `test_unseen`, it is assumed that you would like to download (or link) the dev or
+or `test_unseen`, it is assumed that you would like to download the dev or
 test data we distribute separately.
 
 #### Automatic download
@@ -99,9 +99,12 @@ Also make sure that the variable `local_download_data` is not set in the run scr
 #### Link to manual download
 
 In the run script set the variable `local_download_data` to indicate where you downloaded the data.
-The path must be the folder which contains the sub-folders `srf` and `focusnews`, and optionally also
-`dev` and `test`. Each of these sub-folders in turn is expected to contain the sub-sub-folders
+The path must be the folder which contains the sub-folders `srf` and `focusnews`.
+Each of these sub-folders in turn is expected to contain the sub-sub-folders
 `videos`, `subtitles`, `openpose` and `mediapipe`.
+
+Our separate dev and test data are always downloaded from a public URL, even if the variable `local_download_data` is set. If
+download folders already exist, downloads are not repeated.
 
 ## Basic setup
 

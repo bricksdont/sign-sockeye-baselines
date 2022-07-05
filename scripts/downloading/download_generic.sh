@@ -134,31 +134,23 @@ for testing_corpus in $testing_corpora; do
 
     mkdir -p $download_sub
 
-    if [[ $local_download_data == "false" ]]; then
+    # dev_unseen always downloaded from public URL, test_unseen currently always linked locally (temporary solution)
 
-        if [[ $testing_corpus == "dev_unseen" ]]; then
+    if [[ $testing_corpus == "dev_unseen" ]]; then
 
-            wget $DEV_URL -P $download_sub
-            (cd $download_sub && tar -xzvf dev.v$DEV_VERSION.tar.gz)
-            mv $download_sub/dev/dsgs-de/* $download_sub
-        else
-            # assume testing_corpus is "test_unseen"
-
-            # TODO: download test data instead of also linking locally here once it is available online
-            local_download_data="/net/cephfs/shares/volk.cl.uzh/EASIER/WMT_Shared_Task"
-
-            corpus_name=$testing_corpus
-
-            . $scripts/downloading/download_link_folder_generic.sh
-
-        fi
-
+        wget $DEV_URL -P $download_sub
+        (cd $download_sub && tar -xzvf dev.v$DEV_VERSION.tar.gz)
+        mv $download_sub/dev/dsgs-de/* $download_sub
     else
-        # in that case link existing files
+        # assume testing_corpus is "test_unseen"
+
+        # TODO: download test data instead of also linking locally here once it is available online
+        local_download_data="/net/cephfs/shares/volk.cl.uzh/EASIER/WMT_Shared_Task"
 
         corpus_name=$testing_corpus
 
         . $scripts/downloading/download_link_folder_generic.sh
+
     fi
 done
 
