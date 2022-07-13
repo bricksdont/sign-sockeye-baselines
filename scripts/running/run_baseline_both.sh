@@ -19,7 +19,7 @@ pose_type="openpose"
 training_corpora="focusnews srf"
 testing_corpora="test dev_unseen test_unseen"
 
-force_target_fps="false"
+force_target_fps="true"
 normalize_poses="true"
 
 bucket_scaling="true"
