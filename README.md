@@ -140,6 +140,22 @@ A baseline using SRF data:
 
     scripts/running/run_baseline_srf.sh
 
+## Baseline scores examples
+
+From what we've seen so far, evaluation scores are extremely low, generally between 0.2 and 1.0 BLEU (varying simple top-level
+settings achieves up to 1.0 BLEU). Here are the BLEU scores for some of the example running scripts:
+
+| **training corpora** | **model name**     | **run script**                    | **test split from train** | **official dev** | **official test** |
+|----------------------|--------------------|-----------------------------------|---------------------------|------------------|-------------------|
+| focusnews            | baseline_focusnews | running/run_baseline_focusnews.sh | 0.231                     | 0.216            |                   |
+| srf                  | baseline_srf       | running/run_baseline_srf.sh       | 0.354                     | 0.589            |                   |
+| focusnews, srf       | baseline_both      | running/run_baseline_both.sh      | 0.074                     | 0.157            |                   |
+
+"official dev" is the development data that was released separately, see https://www.wmt-slt.com/data. The baseline scripts
+do not use the official dev data for training or validation.
+
+The target labels of the official test data are not released yet.
+
 ## Ideas for improving this baseline
 
 - find bugs :-)
