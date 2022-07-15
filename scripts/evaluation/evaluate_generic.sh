@@ -45,6 +45,14 @@ tokenize="true"
 
 for corpus in $testing_corpora; do
 
+    # if testing corpus is test_unseen, do not evaluate at the moment
+    # only the sources are released currently
+
+    if [[ $corpus == "test_unseen" ]]; then
+        echo "Skipping evaluation on 'test_unseen' corpus since the labels are not released yet."
+        continue
+    fi
+
     ref=$data_sub_sub/$corpus.trg
     hyp=$translations_sub_sub/$corpus.trg
 
