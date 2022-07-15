@@ -1,7 +1,5 @@
 #! /bin/bash
 
-set -u
-
 # calling process needs to set:
 # $base
 # $training_corpora
@@ -22,6 +20,13 @@ zenodo_token_srf_videos_subtitles=$7
 scripts=$base/scripts
 download=$base/download
 venvs=$base/venvs
+
+eval "$(conda shell.bash hook)"
+source activate $venvs/sockeye3
+
+# after ativating the env on purpose
+
+set -u
 
 mkdir -p $download
 
@@ -148,7 +153,7 @@ for testing_corpus in $testing_corpora; do
         # assume testing_corpus is "test_unseen"
 
         wget $TEST_SOURCES_URL -P $download_sub
-        (cd $download_sub && tar -xzvf test.v$TEST_VERSION.tar.gz)
+        (cd $download_sub && tar -xzvf test_sources.v$TEST_VERSION.tar.gz)
         mv $download_sub/test/dsgs-de/* $download_sub
 
         # currently, only the sources are available
