@@ -166,7 +166,7 @@ an example:
 
     wmt-wrap \
         -s slttest2022.dsgs-de.sources.xml \
-        -t translations/dsgs-de/baseline_focusnews/test.trg \
+        -t translations/dsgs-de/baseline_focusnews/test_unseen.trg \
         -n baseline_focusnews -l de \
         > slttest2022.dsgs-de.hypo.de.xml
 

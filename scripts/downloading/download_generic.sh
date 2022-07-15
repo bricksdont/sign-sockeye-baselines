@@ -36,6 +36,9 @@ ZENODO_DEPOSIT_ID_SRF_VIDEOS_SUBTITLES=6637392
 DEV_VERSION="3.0"
 DEV_URL="https://files.ifi.uzh.ch/cl/archiv/2022/easier/wmtslt/dev/dev.v$DEV_VERSION.tar.gz"
 
+TEST_VERSION="3.0"
+TEST_SOURCES_URL="https://files.ifi.uzh.ch/cl/archiv/2022/easier/wmtslt/test/test_sources.v$TEST_VERSION.tar.gz"
+
 # only download if user indicated they have *not* already downloaded elsewhere
 
 for training_corpus in $training_corpora; do
@@ -144,12 +147,14 @@ for testing_corpus in $testing_corpora; do
     else
         # assume testing_corpus is "test_unseen"
 
-        # TODO: download test data instead of also linking locally here once it is available online
-        local_download_data="/net/cephfs/shares/volk.cl.uzh/EASIER/WMT_Shared_Task"
+        wget $TEST_SOURCES_URL -P $download_sub
+        (cd $download_sub && tar -xzvf test.v$TEST_VERSION.tar.gz)
+        mv $download_sub/test/dsgs-de/* $download_sub
 
-        corpus_name=$testing_corpus
+        # currently, only the sources are available
+        # create a dummy subtitle folder
 
-        . $scripts/downloading/download_link_folder_generic.sh
+        python $scripts/downloading/add_dummy_subtitles_to_video_folder.py --download-sub $download_sub
 
     fi
 done
