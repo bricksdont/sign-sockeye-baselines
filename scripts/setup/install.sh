@@ -36,3 +36,7 @@ pip install --upgrade sign-language-datasets==0.0.7 pose-format==0.0.14
 # install subtitle library
 
 pip install srt
+
+# install library to make an XML submission in WMT format
+
+pip install git+https://github.com/wmt-conference/wmt-format-tools.git

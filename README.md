@@ -156,6 +156,22 @@ do not use the official dev data for training or validation.
 
 The target labels of the official test data are not released yet.
 
+## Making a submission
+
+Submissions should use the [WMT XML format](https://github.com/wmt-conference/wmt-format-tools). We provide the test set sources in this
+format. Here is how to download the source XML and combine it with baseline translations, using the system `baseline_focusnews` as 
+an example:
+
+    wget https://files.ifi.uzh.ch/cl/archiv/2022/easier/wmtslt/test/dsgs-de/slttest2022.dsgs-de.sources.xml
+
+    wmt-wrap \
+        -s slttest2022.dsgs-de.sources.xml \
+        -t translations/dsgs-de/baseline_focusnews/test.trg \
+        -n baseline_focusnews -l de \
+        > slttest2022.dsgs-de.hypo.de.xml
+
+Then upload the resulting file `slttest2022.dsgs-de.hypo.de.xml` on the OCELoT submission platform.
+
 ## Ideas for improving this baseline
 
 - find bugs :-)
