@@ -78,7 +78,7 @@ def main():
     video_folder = os.path.join(args.download_sub, "videos")
     subtitle_folder = os.path.join(args.download_sub, "subtitles")
 
-    os.makedirs(subtitle_folder)
+    os.makedirs(subtitle_folder, exist_ok=True)
 
     for video_name in os.listdir(video_folder):
 
