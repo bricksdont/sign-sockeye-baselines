@@ -164,6 +164,8 @@ an example:
 
     wget https://files.ifi.uzh.ch/cl/archiv/2022/easier/wmtslt/test/dsgs-de/slttest2022.dsgs-de.sources.xml
 
+    # first activate the conda env, then:
+
     wmt-wrap \
         -s slttest2022.dsgs-de.sources.xml \
         -t translations/dsgs-de/baseline_focusnews/test_unseen.trg \
