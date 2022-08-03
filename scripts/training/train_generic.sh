@@ -70,6 +70,7 @@ transformer_dropout=$dropout
 batch_size=1024
 decode_and_evaluate=500
 checkpoint_interval=1000
+update_interval=10
 
 # check if training is finished
 
@@ -92,6 +93,7 @@ if [[ $dry_run == "true" ]]; then
     transformer_model_size="64"
     transformer_attention_heads="1"
     transformer_feed_forward_num_hidden="64"
+    update_interval="1"
 else
     dry_run_additional_args=""
 fi
@@ -152,4 +154,5 @@ python -m sockeye.train \
 --max-num-checkpoint-not-improved 10 \
 --min-num-epochs 0 \
 --gradient-clipping-type abs \
+--update-interval $update_interval \
 --gradient-clipping-threshold 1 $bucket_scaling_arg $dry_run_additional_args
