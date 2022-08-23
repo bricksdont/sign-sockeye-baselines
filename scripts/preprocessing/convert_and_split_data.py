@@ -687,6 +687,7 @@ def main():
                     break
 
                 # train size has a limit and this example ID is not in the random sample
+                example_id += 1
                 continue
 
             writer = writers_by_id[example_id]
