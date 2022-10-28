@@ -1,4 +1,6 @@
-# sign-sockeye-baselines
+# Baseline systems for the WMT shared task on sign language translation 
+
+https://www.wmt-slt.com/
 
 ## Attribution required
 
